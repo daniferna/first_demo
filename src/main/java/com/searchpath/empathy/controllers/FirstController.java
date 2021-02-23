@@ -1,5 +1,6 @@
 package com.searchpath.empathy.controllers;
 
+import com.searchpath.empathy.responses.FirstControllerResponse;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -17,14 +18,14 @@ import java.util.Optional;
 public class FirstController {
 
     /**
-     * Manage the petitions to "/search" if empty or with query param "/search?query=..."
+     * Manage the petitions to "/search/{query}"
      * @param query The String the petition can contain
      * @return  The response of the server, right now the query and the ElasticSearch cluster name
      */
-    @Get(uri = "{?query}")
-    public HttpResponse<Response> search(@PathVariable Optional<String> query) {
+    @Get("/{query}")
+    public HttpResponse<FirstControllerResponse> search(@PathVariable String query) {
         String cluster_name = getClusterName();
-        var response = new Response(query.orElse("Empty query"), cluster_name);
+        var response = new FirstControllerResponse(query, cluster_name);
         return HttpResponse.ok(response);
     }
 
@@ -47,33 +48,4 @@ public class FirstController {
         return response.getClusterName();
     }
 
-}
-
-/**
- * Serializable data class for the Response
- */
-class Response {
-    String query;
-    String cluster_name;
-
-    public Response(String query, String cluster_name) {
-        this.query = query;
-        this.cluster_name = cluster_name;
-    }
-
-    public String getQuery() {
-        return query;
-    }
-
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
-    public String getCluster_name() {
-        return cluster_name;
-    }
-
-    public void setCluster_name(String cluster_name) {
-        this.cluster_name = cluster_name;
-    }
 }
