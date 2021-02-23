@@ -9,6 +9,9 @@ group = "com.searchpath.empathy"
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url "https://snapshots.elastic.co/maven/"
+    }
 }
 
 micronaut {
@@ -25,6 +28,7 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("javax.annotation:javax.annotation-api")
     implementation("io.micronaut:micronaut-http-client")
+    compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.11.1'
     runtimeOnly("ch.qos.logback:logback-classic")
 }
 
