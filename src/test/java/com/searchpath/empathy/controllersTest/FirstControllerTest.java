@@ -24,7 +24,7 @@ public class FirstControllerTest {
 
     @Test
     public void testSearch() {
-        HttpRequest<String> request = HttpRequest.GET("/search/test");
+        HttpRequest<String> request = HttpRequest.GET("/search?query=test");
         FirstControllerResponse body = client.toBlocking().retrieve(request, FirstControllerResponse.class);
 
         assertNotNull(body);
