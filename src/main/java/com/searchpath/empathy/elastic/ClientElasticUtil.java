@@ -12,15 +12,11 @@ import java.io.IOException;
  * This class methods manage the exceptions in order to have a more readable code elsewhere.
  * */
 @Singleton
-public class ElasticUtil {
+public class ClientElasticUtil implements IElasticUtil {
 
     @Inject
     ElasticClient client;
 
-    /**
-     * Connects with ElasticSearch and ask for the info of the ElasticSearch cluster. Then get the cluster name
-     * @return Name of the ElasticSearch cluster
-     */
     public String getClusterName() {
 
         MainResponse response = null;
