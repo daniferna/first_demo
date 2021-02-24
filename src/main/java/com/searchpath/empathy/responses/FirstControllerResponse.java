@@ -1,7 +1,7 @@
 package com.searchpath.empathy.responses;
 
 /**
- * Serializable data class for the Response
+ * Serializable data class for the FirstController Response
  */
 public class FirstControllerResponse {
     String query;

@@ -16,10 +16,10 @@ public class FirstController {
     private ElasticUtil elasticUtil;
 
     /**
-     * Manage the petitions to "/search/{query}"
+     * Manage the petitions to "/search{query}"
      *
-     * @param query The String the petition can contain
-     * @return The response of the server, right now the query and the ElasticSearch cluster name
+     * @param query The String the petition shall contain with the query info
+     * @return The response of the server, serialized as a JSON, right now the query and the ElasticSearch cluster name
      */
     @Get
     public HttpResponse<FirstControllerResponse> search(@QueryValue String query) {

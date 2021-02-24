@@ -7,6 +7,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 
+/**
+ * Class containing helper methods to interact with the Elastic Client.
+ * This class methods manage the exceptions in order to have a more readable code elsewhere.
+ * */
 @Singleton
 public class ElasticUtil {
 

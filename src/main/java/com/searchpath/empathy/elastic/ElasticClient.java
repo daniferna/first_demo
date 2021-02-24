@@ -6,6 +6,10 @@ import org.elasticsearch.client.RestHighLevelClient;
 
 import javax.inject.Singleton;
 
+/**
+ * Class implementing the Singleton design pattern using @Singleton to access the ElasticSearch client
+ * Access through @Inject tag
+ */
 @Singleton
 public class ElasticClient {
 

@@ -1,19 +1,16 @@
 package com.searchpath.empathy.controllersTest;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.searchpath.empathy.responses.FirstControllerResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
-import io.micronaut.jackson.convert.JacksonConverterRegistrar;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @MicronautTest
 public class FirstControllerTest {
