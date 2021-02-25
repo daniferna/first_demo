@@ -1,12 +1,11 @@
 package com.searchpath.empathy.controllers;
 
 import com.searchpath.empathy.elastic.IElasticUtil;
-import com.searchpath.empathy.responses.FirstControllerResponse;
+import com.searchpath.empathy.POJO.FirstControllerResponse;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
-import jdk.jfr.Name;
 
 import javax.inject.Inject;
 import javax.inject.Named;

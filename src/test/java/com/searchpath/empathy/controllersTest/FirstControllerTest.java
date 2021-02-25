@@ -1,6 +1,6 @@
 package com.searchpath.empathy.controllersTest;
 
-import com.searchpath.empathy.responses.FirstControllerResponse;
+import com.searchpath.empathy.POJO.FirstControllerResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
