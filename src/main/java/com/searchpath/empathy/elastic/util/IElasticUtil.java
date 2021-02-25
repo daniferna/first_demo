@@ -1,4 +1,4 @@
-package com.searchpath.empathy.elastic;
+package com.searchpath.empathy.elastic.util;
 
 public interface IElasticUtil {
 

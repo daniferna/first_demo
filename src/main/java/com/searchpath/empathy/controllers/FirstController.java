@@ -1,6 +1,6 @@
 package com.searchpath.empathy.controllers;
 
-import com.searchpath.empathy.elastic.IElasticUtil;
+import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.POJO.FirstControllerResponse;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
@@ -15,7 +15,7 @@ public class FirstController {
 
     private IElasticUtil elasticUtil;
 
-    @Inject FirstController(@Named("ClientElasticUtil") IElasticUtil elasticUtil) {
+    @Inject FirstController(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
         this.elasticUtil = elasticUtil;
     }
 

@@ -1,5 +1,7 @@
-package com.searchpath.empathy.elastic;
+package com.searchpath.empathy.elastic.util.impl;
 
+import com.searchpath.empathy.elastic.ElasticClient;
+import com.searchpath.empathy.elastic.util.IElasticUtil;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 
@@ -12,7 +14,7 @@ import java.io.IOException;
  * This class methods manage the exceptions in order to have a more readable code elsewhere.
  * */
 @Singleton
-public class ClientElasticUtil implements IElasticUtil {
+public class ElasticClientUtil implements IElasticUtil {
 
     @Inject
     ElasticClient client;
