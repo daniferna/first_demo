@@ -19,14 +19,10 @@ public class ElasticClientUtil implements IElasticUtil {
     @Inject
     ElasticClient client;
 
-    public String getClusterName() {
+    public String getClusterName() throws IOException {
 
         MainResponse response = null;
-        try {
-            response = client.getClient().info(RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        response = client.getClient().info(RequestOptions.DEFAULT);
         return response.getClusterName();
     }
 
