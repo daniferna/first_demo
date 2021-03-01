@@ -1,4 +1,4 @@
-package com.searchpath.empathy.POJO;
+package com.searchpath.empathy.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

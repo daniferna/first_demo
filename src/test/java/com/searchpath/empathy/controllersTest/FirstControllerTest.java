@@ -1,8 +1,7 @@
 package com.searchpath.empathy.controllersTest;
 
-import com.searchpath.empathy.POJO.FirstControllerResponse;
+import com.searchpath.empathy.pojo.FirstControllerResponse;
 import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -42,7 +41,7 @@ public class FirstControllerTest {
 
     @Test
     public void testSearchWithElasticProblem() {
-        //TODO
+        //TODO Explore idea of use mock with wrong port
     }
 
 }

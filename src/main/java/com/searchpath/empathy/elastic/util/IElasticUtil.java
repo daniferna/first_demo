@@ -1,6 +1,7 @@
 package com.searchpath.empathy.elastic.util;
 
 import java.io.IOException;
+import java.net.URL;
 
 public interface IElasticUtil {
 
@@ -9,5 +10,7 @@ public interface IElasticUtil {
      * @return Name of the ElasticSearch cluster
      */
     String getClusterName() throws IOException;
+
+    //String loadIMDBData(URL dataPath);
 
 }

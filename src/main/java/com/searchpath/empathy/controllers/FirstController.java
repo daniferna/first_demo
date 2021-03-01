@@ -2,7 +2,7 @@ package com.searchpath.empathy.controllers;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
-import com.searchpath.empathy.POJO.FirstControllerResponse;
+import com.searchpath.empathy.pojo.FirstControllerResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
