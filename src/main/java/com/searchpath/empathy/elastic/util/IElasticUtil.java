@@ -11,6 +11,6 @@ public interface IElasticUtil {
      */
     String getClusterName() throws IOException;
 
-    //String loadIMDBData(URL dataPath);
+    String loadIMDBData();
 
 }

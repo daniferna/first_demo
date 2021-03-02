@@ -28,6 +28,7 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("javax.annotation:javax.annotation-api")
     implementation("io.micronaut:micronaut-http-client")
+    implementation("com.google.guava:guava:30.1-jre")
     compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.11.1'
     runtimeOnly("ch.qos.logback:logback-classic")
 }

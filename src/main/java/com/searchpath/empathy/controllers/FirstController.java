@@ -26,6 +26,11 @@ public class FirstController {
         this.elasticUtil = elasticUtil;
     }
 
+    @Get("/index")
+    public HttpResponse<String> index() {
+        return HttpResponse.ok(elasticUtil.loadIMDBData());
+    }
+
     /**
      * Manage the petitions to "/search{query}"
      *
