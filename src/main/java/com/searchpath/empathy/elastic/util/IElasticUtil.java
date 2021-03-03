@@ -1,5 +1,7 @@
 package com.searchpath.empathy.elastic.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -11,6 +13,6 @@ public interface IElasticUtil {
      */
     String getClusterName() throws IOException;
 
-    String loadIMDBData();
+    String loadIMDBData() throws IOException;
 
 }

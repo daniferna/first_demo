@@ -27,7 +27,7 @@ public class FirstController {
     }
 
     @Get("/index")
-    public HttpResponse<String> index() {
+    public HttpResponse<String> index() throws IOException {
         return HttpResponse.ok(elasticUtil.loadIMDBData());
     }
 
