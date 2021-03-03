@@ -26,6 +26,12 @@ public class FirstController {
         this.elasticUtil = elasticUtil;
     }
 
+    /**
+     * Call which initiates the process of indexing of the IMDB data stored in the resources folder.
+     * @return A response with OK status and the returned String of the called method if everything works well.
+     * @see IElasticUtil#loadIMDBData()
+     * @throws IOException If something went wrong
+     */
     @Get("/index")
     public HttpResponse<String> index() throws IOException {
         return HttpResponse.ok(elasticUtil.loadIMDBData());
