@@ -2,30 +2,28 @@ package com.searchpath.empathy.elastic.util.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
 import com.google.common.collect.*;
 import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
-import org.apache.commons.logging.impl.Log4JLogger;
-import org.apache.logging.log4j.simple.SimpleLogger;
-import org.elasticsearch.action.ActionListener;
+import com.searchpath.empathy.pojo.QueryResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Class containing helper methods to interact with the Elastic Client.
@@ -72,7 +70,7 @@ public class ElasticClientUtil implements IElasticUtil {
                 var data = line.split("\t");
                 var film = new Film(data[0], data[2],
                         data[8].equals("\\N") ? null : data[8].split(","),
-                        data[5],
+                        data[1], data[5],
                         data[6].equals("\\N") ? null : data[6]);
                 bulk.add(new IndexRequest("imdb").id(film.getId())
                         .source(objectMapper.writeValueAsString(film), XContentType.JSON));
@@ -84,6 +82,35 @@ public class ElasticClientUtil implements IElasticUtil {
 
         return "Success loading data";
     }
+
+    @Override
+    public QueryResponse searchFilmsByTitle(String title) throws IOException {
+        var request = new SearchRequest("imdb");
+        var source = new SearchSourceBuilder()
+                .query(new MatchQueryBuilder("title", title))
+                .size(10);
+        request.source(source);
+
+        var response = client.getClient().search(request, RequestOptions.DEFAULT);
+        long total = response.getHits().getTotalHits().value;
+        Film[] films = parseHitToFilms(response.getHits());
+
+        return new QueryResponse(total, films);
+    }
+
+    private Film[] parseHitToFilms(SearchHits hits) {
+        return Arrays.stream(hits.getHits()).map(hit -> {
+            String source = hit.getSourceAsString();
+            try {
+                return objectMapper.readValue(source, Film.class);
+            } catch (JsonProcessingException e) {
+                Throwables.throwIfUnchecked(e);
+                throw new RuntimeException(e);
+            }
+        }).toArray(Film[]::new);
+    }
+
+
 
     /**
      * Helper method, takes an InputStream and return a BufferedReader

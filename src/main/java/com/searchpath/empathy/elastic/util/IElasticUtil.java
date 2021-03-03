@@ -1,16 +1,9 @@
 package com.searchpath.empathy.elastic.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.Iterators;
 import com.searchpath.empathy.elastic.ElasticClient;
-import com.searchpath.empathy.elastic.util.impl.ElasticClientUtil;
-import com.searchpath.empathy.pojo.Film;
-import org.elasticsearch.action.bulk.BulkRequest;
+import com.searchpath.empathy.pojo.QueryResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Iterator;
 
 public interface IElasticUtil {
 
@@ -29,4 +22,5 @@ public interface IElasticUtil {
      */
     String loadIMDBData() throws IOException;
 
+    QueryResponse searchFilmsByTitle(String title) throws IOException;
 }

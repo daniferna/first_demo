@@ -3,6 +3,7 @@ package com.searchpath.empathy.controllers;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.FirstControllerResponse;
+import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -44,10 +45,8 @@ public class FirstController {
      * @return The response of the server, serialized as a JSON, right now the query and the ElasticSearch cluster name
      */
     @Get
-    public HttpResponse<FirstControllerResponse> search(@QueryValue String query) throws IOException {
-        String cluster_name = elasticUtil.getClusterName();
-        var response = new FirstControllerResponse(query, cluster_name);
-        return HttpResponse.ok(response);
+    public HttpResponse<QueryResponse> search(@QueryValue String query) throws IOException {
+        return HttpResponse.ok(elasticUtil.searchFilmsByTitle(query));
     }
 
     /**

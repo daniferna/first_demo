@@ -1,15 +1,18 @@
 package com.searchpath.empathy.controllersTest;
 
+import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.pojo.FirstControllerResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,8 +43,11 @@ public class FirstControllerTest {
     }
 
     @Test
+    @MockBean()
     public void testSearchWithElasticProblem() {
         //TODO Explore idea of use mock with wrong port
     }
+
+
 
 }
