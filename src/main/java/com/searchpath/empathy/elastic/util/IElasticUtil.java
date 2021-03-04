@@ -25,12 +25,12 @@ public interface IElasticUtil {
     String loadIMDBData() throws IOException;
 
     /**
-     * Search films by their title and transform the result of the query into a QueryResponse object.
+     * Search films based on the query and transforms the result of the query into a QueryResponse object.
      *
-     * @param title The title of the movie you are looking for
+     * @param query The query containing information of the movie you are looking for
      * @return A QueryResponse object containing the films and the number of the results
      * @throws IOException In case there is an error accessing elastic search.
      * @see QueryResponse
      */
-    QueryResponse searchFilmsByTitle(String title) throws IOException;
+    QueryResponse searchFilms(String query) throws IOException;
 }

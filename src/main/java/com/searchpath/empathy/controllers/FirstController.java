@@ -2,7 +2,6 @@ package com.searchpath.empathy.controllers;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
-import com.searchpath.empathy.pojo.FirstControllerResponse;
 import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -46,7 +45,7 @@ public class FirstController {
      */
     @Get
     public HttpResponse<QueryResponse> search(@QueryValue String query) throws IOException {
-        return HttpResponse.ok(elasticUtil.searchFilmsByTitle(query));
+        return HttpResponse.ok(elasticUtil.searchFilms(query));
     }
 
     /**

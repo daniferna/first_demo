@@ -15,6 +15,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
@@ -93,10 +94,10 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     the query through the client.
      */
     @Override
-    public QueryResponse searchFilmsByTitle(String title) throws IOException {
+    public QueryResponse searchFilms(String query) throws IOException {
         var request = new SearchRequest("imdb");
         var source = new SearchSourceBuilder()
-                .query(new MatchQueryBuilder("title", title))
+                .query(new MultiMatchQueryBuilder(query, "title", "genres", "type", "startDate"))
                 .size(10);
         request.source(source);
 
