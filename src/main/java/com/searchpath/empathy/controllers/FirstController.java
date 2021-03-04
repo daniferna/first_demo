@@ -9,13 +9,13 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.hateoas.JsonError;
 import io.micronaut.http.hateoas.Link;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.Optional;
 
 @Controller("/search")
 public class FirstController {
@@ -38,14 +38,20 @@ public class FirstController {
     }
 
     /**
-     * Manage the petitions to "/search{query}"
+     * Manage the petitions to "/search{...}"
      *
-     * @param query The String the petition shall contain with the query info
-     * @return The response of the server, serialized as a JSON, right now the query and the ElasticSearch cluster name
+     * @param query,title The String the petition shall contain with the query info
+     * @return The response of the server, serialized as a JSON {@link QueryResponse}
      */
-    @Get
-    public HttpResponse<QueryResponse> search(@QueryValue String query) throws IOException {
-        return HttpResponse.ok(elasticUtil.searchFilms(query));
+    @Get("{?query}{?title}")
+    public HttpResponse<QueryResponse> search(Optional<String> title, Optional<String> query) throws IOException {
+
+        if (query.isPresent())
+            return HttpResponse.ok(elasticUtil.searchFilms(query.get()));
+        else if (title.isPresent())
+            return HttpResponse.ok(elasticUtil.searchFilmByTitle(title.get()));
+
+        return HttpResponse.badRequest();
     }
 
     /**

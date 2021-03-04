@@ -34,7 +34,7 @@ public class FirstControllerTest {
     @Inject
     ObjectMapper objectMapper;
 
-    private IElasticUtil elasticUtil;
+    private final IElasticUtil elasticUtil;
 
     @Inject FirstControllerTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
         this.elasticUtil = elasticUtil;
@@ -47,6 +47,16 @@ public class FirstControllerTest {
 
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchFilms("The simpsons movie");
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchByTitle() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET("/search?title=Avengers");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchFilmByTitle("Avengers");
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
