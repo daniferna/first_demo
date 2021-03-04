@@ -14,7 +14,7 @@ public class Film {
     private final String[] genres;
     private final String type;
     private final String startDate;
-    private String endDate;
+    private final String endDate;
 
     @JsonCreator
     public Film(@JsonProperty("id") String id,

@@ -14,6 +14,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -40,9 +41,13 @@ public class ElasticClientUtil implements IElasticUtil {
     ObjectMapper objectMapper;
 
 
+    /**
+     * Use the client info method {@link org.elasticsearch.client.RestHighLevelClient#info(RequestOptions)}
+     * to get the cluster name.
+     */
     @Override
     public String getClusterName() throws IOException {
-        MainResponse response = null;
+        MainResponse response;
         response = client.getClient().info(RequestOptions.DEFAULT);
         return response.getClusterName();
     }
@@ -88,9 +93,9 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * This implementation use the {@link ElasticClient} API to look for the films.
-     * It creates a {@link SearchRequest}, and using a {@link SearchSourceBuilder}, creates the query.
+     * It creates a {@link SearchRequest}, and using a {@link MultiMatchQueryBuilder}, creates the query.
      * <p>
-     * Once the response is obtained, is processed by a private helper method {@see #parseHitToFilms(SearchHits)}
+     * Once the response is obtained, is processed by a private helper method {@link #getQueryResponse(SearchRequest)} )}
      * which transform the hits into {@link Film} objects.
      *
      * @throws IOException If the method can't serialize the hit into a Film JSON or an error occur while searching
@@ -101,13 +106,22 @@ public class ElasticClientUtil implements IElasticUtil {
         var request = new SearchRequest("imdb");
 
         var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "startDate");
-        queryBuilder.field("type", 3);
-        queryBuilder.field("startDate", 2);
+        queryBuilder.type(MultiMatchQueryBuilder.Type.CROSS_FIELDS);
         request.source(getSearchSourceBuilder(queryBuilder));
 
         return getQueryResponse(request);
     }
 
+    /**
+     * This implementation use the {@link ElasticClient} API to look for the films.
+     * It creates a {@link SearchRequest}, and using a {@link MatchQueryBuilder}, creates the query.
+     * <p>
+     * Once the response is obtained, is processed by a private helper method {@link #getQueryResponse(SearchRequest)} )}
+     * which transform the hits into {@link Film} objects.
+     *
+     * @throws IOException If the method can't serialize the hit into a Film JSON or an error occur while searching
+     *                     the query through the client.
+     */
     @Override
     public QueryResponse searchFilmByTitle(String title) throws IOException {
         var request = new SearchRequest("imdb");
@@ -117,6 +131,7 @@ public class ElasticClientUtil implements IElasticUtil {
 
         return getQueryResponse(request);
     }
+
 
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
         var sourceBuilder = new SearchSourceBuilder();
@@ -159,7 +174,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The BufferedReader of the file
      */
     private BufferedReader readFile(InputStream dataPath) {
-        BufferedReader reader = null;
+        BufferedReader reader;
         reader = new BufferedReader(new InputStreamReader(dataPath, StandardCharsets.UTF_8));
         return reader;
     }
