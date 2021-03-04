@@ -16,6 +16,7 @@ import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
@@ -39,6 +40,7 @@ public class ElasticClientUtil implements IElasticUtil {
     ObjectMapper objectMapper;
 
 
+    @Override
     public String getClusterName() throws IOException {
         MainResponse response = null;
         response = client.getClient().info(RequestOptions.DEFAULT);
@@ -57,6 +59,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @throws IOException If the method can't deserialize the film object into JSON
      *                     or an error occur while loading the bulk data through the client.
      */
+    @Override
     public String loadIMDBData() throws IOException {
         var reader = readFile(this.getClass().getClassLoader().getResourceAsStream("data.tsv"));
         var bulk = new BulkRequest();
@@ -96,10 +99,32 @@ public class ElasticClientUtil implements IElasticUtil {
     @Override
     public QueryResponse searchFilms(String query) throws IOException {
         var request = new SearchRequest("imdb");
-        var source = new SearchSourceBuilder()
-                .query(new MultiMatchQueryBuilder(query, "title", "genres", "type", "startDate"))
-                .size(10);
-        request.source(source);
+
+        var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "startDate");
+        queryBuilder.field("type", 3);
+        queryBuilder.field("startDate", 2);
+        request.source(getSearchSourceBuilder(queryBuilder));
+
+        return getQueryResponse(request);
+    }
+
+    @Override
+    public QueryResponse searchFilmByTitle(String title) throws IOException {
+        var request = new SearchRequest("imdb");
+
+        var queryBuilder = new MatchQueryBuilder(title, "title");
+        request.source(getSearchSourceBuilder(queryBuilder));
+
+        return getQueryResponse(request);
+    }
+
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(10);
+        return sourceBuilder.query(queryBuilder);
+    }
+
+    private QueryResponse getQueryResponse(SearchRequest request) throws IOException {
 
         var response = client.getClient().search(request, RequestOptions.DEFAULT);
         long total = response.getHits().getTotalHits().value;
@@ -107,6 +132,7 @@ public class ElasticClientUtil implements IElasticUtil {
 
         return new QueryResponse(total, films);
     }
+
 
     /**
      * Helper method which transforms the elastic search response hits into Film objects.
