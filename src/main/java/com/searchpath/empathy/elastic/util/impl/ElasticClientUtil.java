@@ -16,6 +16,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CloseIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -28,6 +29,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -68,14 +71,16 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     or an error occur while loading the bulk data through the client.
      */
     @Override
-    public String loadIMDBData() throws IOException {
-        createIndex();
+    public String loadIMDBData() throws IOException, ParseException {
+        if (!client.getClient().indices().exists(new GetIndexRequest("imdb"), RequestOptions.DEFAULT))
+            createIndex();
 
         var reader = readFile(this.getClass().getClassLoader().getResourceAsStream("data.tsv"));
         var bulk = new BulkRequest();
 
-        UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().iterator(), 50000);
+        UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().skip(1).iterator(), 10000);
 
+        var dateFormat = new SimpleDateFormat("yyyy");
         while (linesList.hasNext()) {
             List<String> list = linesList.next();
 
@@ -83,8 +88,9 @@ public class ElasticClientUtil implements IElasticUtil {
                 var data = line.split("\t");
                 var film = new Film(data[0], data[2],
                         data[8].equals("\\N") ? null : data[8].split(","),
-                        data[1], data[5],
-                        data[6].equals("\\N") ? null : data[6]);
+                        data[1],
+                        data[5].equals("\\N") ? null : data[5] + "-01-01",
+                        data[6].equals("\\N") ? null : data[6] + "-01-01");
                 bulk.add(new IndexRequest("imdb").id(film.getId())
                         .source(objectMapper.writeValueAsString(film), XContentType.JSON));
             }
@@ -93,15 +99,18 @@ public class ElasticClientUtil implements IElasticUtil {
             bulk = new BulkRequest();
         }
 
+        reader.close();
         return "Success loading data";
     }
 
     private void createIndex() throws IOException {
         CreateIndexRequest create = new CreateIndexRequest("imdb");
 
-        Map<String, Object> map = objectMapper.readValue(
-                this.getClass().getClassLoader().getResourceAsStream("mappingIMDBIndex.json")
-                , Map.class);
+        var json = Objects.requireNonNull(this.getClass().getClassLoader()
+                .getResourceAsStream("mappingIMDBIndex.json"), "mapping JSON not found");
+
+        Map<String, Object> map = objectMapper.readValue(json, Map.class);
+            json.close();
 
         create.source(map);
 

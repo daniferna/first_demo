@@ -15,6 +15,7 @@ import io.micronaut.http.hateoas.Link;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Optional;
 
 @Controller("/search")
@@ -33,7 +34,7 @@ public class FirstController {
      * @throws IOException If something went wrong
      */
     @Get("/index")
-    public HttpResponse<String> index() throws IOException {
+    public HttpResponse<String> index() throws IOException, ParseException {
         return HttpResponse.ok(elasticUtil.loadIMDBData());
     }
 

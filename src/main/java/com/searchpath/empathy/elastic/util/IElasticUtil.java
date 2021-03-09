@@ -4,6 +4,7 @@ import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.pojo.QueryResponse;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 public interface IElasticUtil {
 
@@ -22,7 +23,7 @@ public interface IElasticUtil {
      *
      * @return "Success loading data" if everything went well.
      */
-    String loadIMDBData() throws IOException;
+    String loadIMDBData() throws IOException, ParseException;
 
     /**
      * Search films based on the query and transforms the result of the query into a QueryResponse object.
