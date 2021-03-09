@@ -1,5 +1,6 @@
 package com.searchpath.empathy.elastic.util.impl;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
@@ -13,6 +14,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
+import org.elasticsearch.client.indices.CloseIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -66,6 +69,8 @@ public class ElasticClientUtil implements IElasticUtil {
      */
     @Override
     public String loadIMDBData() throws IOException {
+        createIndex();
+
         var reader = readFile(this.getClass().getClassLoader().getResourceAsStream("data.tsv"));
         var bulk = new BulkRequest();
 
@@ -89,6 +94,18 @@ public class ElasticClientUtil implements IElasticUtil {
         }
 
         return "Success loading data";
+    }
+
+    private void createIndex() throws IOException {
+        CreateIndexRequest create = new CreateIndexRequest("imdb");
+
+        Map<String, Object> map = objectMapper.readValue(
+                this.getClass().getClassLoader().getResourceAsStream("mappingIMDBIndex.json")
+                , Map.class);
+
+        create.source(map);
+
+        client.getClient().indices().create(create, RequestOptions.DEFAULT);
     }
 
     /**

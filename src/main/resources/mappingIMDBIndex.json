@@ -1,0 +1,43 @@
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "search_analyzer": "title_search_analyzer",
+        "analyzer": "title_analyzer"
+      },
+      "genres": {
+        "type": "text"
+      },
+      "type": {
+        "type": "text"
+      },
+      "start_year": {
+        "type": "date",
+        "format": "yyyy-mm-dd"
+      },
+      "end_year": {
+        "type": "date",
+        "format": "yyyy-mm-dd"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "title_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "char_filter": [],
+          "filter": []
+        },
+        "title_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "char_filter": [],
+          "filter": []
+        }
+      }
+    }
+  }
+}

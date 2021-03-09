@@ -11,7 +11,7 @@ public class QueryResponse {
     private final long total;
     private final Film[] items;
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    @JsonCreator()
     public QueryResponse(@JsonProperty long total, @JsonProperty Film[] items) {
         this.total = total;
         this.items = items;
