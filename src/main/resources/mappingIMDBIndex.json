@@ -29,13 +29,51 @@
           "type": "custom",
           "tokenizer": "whitespace",
           "char_filter": [],
-          "filter": []
+          "filter": [
+            "lowercase",
+            "asciifolding",
+            "synonym",
+            "my_custom_word_delimiter_graph_filter",
+            "my_pattern_replace_filter"
+          ]
         },
         "title_analyzer": {
           "type": "custom",
-          "tokenizer": "standard",
+          "tokenizer": "whitespace",
           "char_filter": [],
-          "filter": []
+          "filter": [
+            "lowercase",
+            "asciifolding",
+            "my_pattern_replace_filter"
+          ]
+        }
+      },
+      "filter": {
+        "my_pattern_replace_filter": {
+          "type": "pattern_replace",
+          "pattern": "[:|=]",
+          "replacement": "",
+          "all": false
+        },
+        "my_custom_word_delimiter_graph_filter": {
+          "type": "word_delimiter_graph",
+          "catenate_words": true,
+          "stem_english_possessive": true
+        },
+        "synonym": {
+          "type": "synonym",
+          "synonyms": [
+            "1, I",
+            "II => 2",
+            "III => 3",
+            "IV => 4",
+            "V => 5",
+            "VI => 6",
+            "VII => 7",
+            "VIII => 8",
+            "IX => 9",
+            "X => 10"
+          ]
         }
       }
     }
