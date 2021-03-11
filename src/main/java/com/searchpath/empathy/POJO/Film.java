@@ -1,25 +1,32 @@
 package com.searchpath.empathy.pojo;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonNaming(value=PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Film {
 
-    private String id;
-    private String title;
-    private String[] genres;
-    private String type;
-    private String start_year;
-    private String end_year;
+    private final String id;
+    private final String title;
+    private final String[] genres;
+    private final String type;
+    private final String start_year;
+    private final String end_year;
 
-    public Film() {}
-
-    public Film(String id, String title, String[] genres, String type, String start_year, String end_year) {
+    @JsonCreator()
+    public Film(@JsonProperty("id") String id,
+                @JsonProperty("title") String title,
+                @JsonProperty("genres") String[] genres,
+                @JsonProperty("type") String type,
+                @JsonProperty("start_year") String start_year,
+                @JsonProperty("end_year") String end_year) {
         this.id = id;
         this.title = title;
         this.genres = genres;
@@ -62,5 +69,20 @@ public class Film {
                 .add("start_year=" + start_year)
                 .add("end_year=" + end_year)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Film film = (Film) o;
+        return getId().equals(film.getId()) && Objects.equals(getTitle(), film.getTitle()) && Arrays.equals(getGenres(), film.getGenres()) && Objects.equals(getType(), film.getType()) && Objects.equals(start_year, film.start_year) && Objects.equals(end_year, film.end_year);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getId(), getTitle(), getType(), start_year, end_year);
+        result = 31 * result + Arrays.hashCode(getGenres());
+        return result;
     }
 }

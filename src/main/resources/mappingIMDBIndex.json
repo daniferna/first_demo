@@ -14,11 +14,11 @@
       },
       "start_year": {
         "type": "date",
-        "format": "yyyy-mm-dd"
+        "format": "year_month_day"
       },
       "end_year": {
         "type": "date",
-        "format": "yyyy-mm-dd"
+        "format": "year_month_day"
       }
     }
   },
@@ -44,7 +44,8 @@
           "filter": [
             "lowercase",
             "asciifolding",
-            "my_pattern_replace_filter"
+            "my_pattern_replace_filter",
+            "my_custom_word_delimiter_graph_filter"
           ]
         }
       },
