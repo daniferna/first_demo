@@ -1,10 +1,10 @@
 package com.searchpath.empathy.elastic.util.impl;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
-import com.google.common.collect.*;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.UnmodifiableIterator;
 import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
@@ -14,11 +14,9 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
-import org.elasticsearch.client.indices.CloseIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.engine.Engine;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -27,11 +25,17 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class containing helper methods to interact with the Elastic Client.
@@ -131,7 +135,8 @@ public class ElasticClientUtil implements IElasticUtil {
     public QueryResponse searchFilms(String query) throws IOException {
         var request = new SearchRequest("imdb");
 
-        var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "startDate");
+        var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
+        queryBuilder.field("title", 2);
         queryBuilder.type(MultiMatchQueryBuilder.Type.CROSS_FIELDS);
         request.source(getSearchSourceBuilder(queryBuilder));
 
@@ -152,7 +157,7 @@ public class ElasticClientUtil implements IElasticUtil {
     public QueryResponse searchFilmByTitle(String title) throws IOException {
         var request = new SearchRequest("imdb");
 
-        var queryBuilder = new MatchQueryBuilder(title, "title");
+        var queryBuilder = new MatchQueryBuilder("title", title);
         request.source(getSearchSourceBuilder(queryBuilder));
 
         return getQueryResponse(request);

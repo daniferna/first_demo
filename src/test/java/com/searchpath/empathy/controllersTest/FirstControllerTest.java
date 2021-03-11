@@ -1,24 +1,18 @@
 package com.searchpath.empathy.controllersTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
-import com.searchpath.empathy.pojo.FirstControllerResponse;
-import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
-
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
