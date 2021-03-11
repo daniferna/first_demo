@@ -40,7 +40,7 @@ public class FirstControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchFilms("The simpsons movie");
+        var expectedResponse = elasticUtil.search("The simpsons movie");
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -50,7 +50,7 @@ public class FirstControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchFilmByTitle("Avengers");
+        var expectedResponse = elasticUtil.searchByTitle("Avengers");
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 

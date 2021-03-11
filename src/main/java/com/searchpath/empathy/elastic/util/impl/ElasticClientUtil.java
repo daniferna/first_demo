@@ -122,7 +122,7 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     /**
-     * This implementation use the {@link ElasticClient} API to look for the films.
+     * This implementation use the {@link ElasticClient} API to look for the media.
      * It creates a {@link SearchRequest}, and using a {@link MultiMatchQueryBuilder}, creates the query.
      * <p>
      * Once the response is obtained, is processed by a private helper method {@link #getQueryResponse(SearchRequest)} )}
@@ -132,19 +132,20 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     the query through the client.
      */
     @Override
-    public QueryResponse searchFilms(String query) throws IOException {
+    public QueryResponse search(String query) throws IOException {
         var request = new SearchRequest("imdb");
 
         var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
-        queryBuilder.field("title", 2);
-        queryBuilder.type(MultiMatchQueryBuilder.Type.CROSS_FIELDS);
+        queryBuilder.field("title", 3);
+        queryBuilder.field("type", 2);
+        queryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
         request.source(getSearchSourceBuilder(queryBuilder));
 
         return getQueryResponse(request);
     }
 
     /**
-     * This implementation use the {@link ElasticClient} API to look for the films.
+     * This implementation use the {@link ElasticClient} API to look for the media.
      * It creates a {@link SearchRequest}, and using a {@link MatchQueryBuilder}, creates the query.
      * <p>
      * Once the response is obtained, is processed by a private helper method {@link #getQueryResponse(SearchRequest)} )}
@@ -154,7 +155,7 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     the query through the client.
      */
     @Override
-    public QueryResponse searchFilmByTitle(String title) throws IOException {
+    public QueryResponse searchByTitle(String title) throws IOException {
         var request = new SearchRequest("imdb");
 
         var queryBuilder = new MatchQueryBuilder("title", title);

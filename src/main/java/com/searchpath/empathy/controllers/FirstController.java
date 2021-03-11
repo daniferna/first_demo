@@ -48,9 +48,9 @@ public class FirstController {
     public HttpResponse<QueryResponse> search(Optional<String> title, Optional<String> query) throws IOException {
 
         if (query.isPresent())
-            return HttpResponse.ok(elasticUtil.searchFilms(query.get()));
+            return HttpResponse.ok(elasticUtil.search(query.get()));
         else if (title.isPresent())
-            return HttpResponse.ok(elasticUtil.searchFilmByTitle(title.get()));
+            return HttpResponse.ok(elasticUtil.searchByTitle(title.get()));
 
         return HttpResponse.badRequest();
     }
