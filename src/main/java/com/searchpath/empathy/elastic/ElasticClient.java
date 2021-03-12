@@ -1,6 +1,5 @@
 package com.searchpath.empathy.elastic;
 
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;

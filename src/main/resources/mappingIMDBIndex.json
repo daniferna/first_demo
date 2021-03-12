@@ -2,7 +2,7 @@
   "mappings": {
     "properties": {
       "title": {
-        "type": "text",
+        "type": "keyword",
         "search_analyzer": "title_search_analyzer",
         "analyzer": "title_analyzer"
       },

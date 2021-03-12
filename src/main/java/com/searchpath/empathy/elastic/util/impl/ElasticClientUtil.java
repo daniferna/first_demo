@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,26 +74,21 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     or an error occur while loading the bulk data through the client.
      */
     @Override
-    public String loadIMDBData() throws IOException, ParseException {
+    public String loadIMDBData() throws IOException {
         if (!client.getClient().indices().exists(new GetIndexRequest("imdb"), RequestOptions.DEFAULT))
             createIndex();
 
         var reader = readFile(this.getClass().getClassLoader().getResourceAsStream("data.tsv"));
         var bulk = new BulkRequest();
 
+        // Split the data stream in chunks of 10.000 lines in a lazy way.
         UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().skip(1).iterator(), 10000);
 
-        var dateFormat = new SimpleDateFormat("yyyy");
         while (linesList.hasNext()) {
             List<String> list = linesList.next();
 
             for (String line : list) {
-                var data = line.split("\t");
-                var film = new Film(data[0], data[2],
-                        data[8].equals("\\N") ? null : data[8].split(","),
-                        data[1],
-                        data[5].equals("\\N") ? null : data[5] + "-01-01",
-                        data[6].equals("\\N") ? null : data[6] + "-01-01");
+                Film film = createFilmFromLine(line);
                 bulk.add(new IndexRequest("imdb").id(film.getId())
                         .source(objectMapper.writeValueAsString(film), XContentType.JSON));
             }
@@ -107,6 +101,26 @@ public class ElasticClientUtil implements IElasticUtil {
         return "Success loading data";
     }
 
+    /**
+     * Helper method, creates a {@see Film} POJO from a line extracted from the data source.
+     * @param line String containing the info of the film separated by tabs.
+     * @return A Film POJO
+     */
+    private Film createFilmFromLine(String line) {
+        var data = line.split("\t");
+        var film = new Film(data[0], data[2],
+                data[8].equals("\\N") ? null : data[8].split(","),
+                data[1],
+                data[5].equals("\\N") ? null : data[5] + "-01-01",
+                data[6].equals("\\N") ? null : data[6] + "-01-01");
+        return film;
+    }
+
+    /**
+     * Helper method, creates the index in elasticsearch using the IMDB Index json config file.
+     * {<a href="file:../../../resources/mappingIMDBIndex.json"}
+     * @throws IOException If an error occur while reading the config file.
+     */
     private void createIndex() throws IOException {
         CreateIndexRequest create = new CreateIndexRequest("imdb");
 
@@ -165,12 +179,25 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
 
+    /**
+     * Helper method, builds a {@see SearchSourceBuilder} from a {@see QueryBuilder} passed by params and then
+     * configure it.
+     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @return The SearchSourceBuilder properly configured.
+     */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(10);
         return sourceBuilder.query(queryBuilder);
     }
 
+    /**
+     * Helper method, do the search request using the {@see ElasticClient} and transform the response into the
+     * normalized response POJO {@see QueryResponse}.
+     * @param request The pre-built SearchRequest that is gonna be called.
+     * @return A QueryResponse POJO with the corresponding data retrieved from the response.
+     * @throws IOException If there is a problem while performing the search request.
+     */
     private QueryResponse getQueryResponse(SearchRequest request) throws IOException {
 
         var response = client.getClient().search(request, RequestOptions.DEFAULT);

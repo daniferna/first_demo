@@ -1,6 +1,5 @@
 package com.searchpath.empathy;
 
-import com.searchpath.empathy.elastic.util.impl.ElasticClientUtil;
 import io.micronaut.runtime.Micronaut;
 
 public class Application {

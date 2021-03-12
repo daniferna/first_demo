@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @MicronautTest
-public class FirstControllerTest {
+public class SearchControllerTest {
 
     @Inject
     @Client("/")
@@ -30,7 +30,8 @@ public class FirstControllerTest {
 
     private final IElasticUtil elasticUtil;
 
-    @Inject FirstControllerTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
+    @Inject
+    SearchControllerTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
         this.elasticUtil = elasticUtil;
     }
 
@@ -60,13 +61,5 @@ public class FirstControllerTest {
 
         Assertions.assertThrows(HttpClientResponseException.class, () -> client.toBlocking().retrieve(request));
     }
-
-    @Test
-    @MockBean()
-    public void testSearchWithElasticProblem() {
-        //TODO Explore idea of use mock with wrong port
-    }
-
-
 
 }
