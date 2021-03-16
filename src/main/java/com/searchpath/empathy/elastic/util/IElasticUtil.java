@@ -41,5 +41,5 @@ public interface IElasticUtil {
      * @return A QueryResponse containing the films and the number of results
      * @throws IOException In case there is an error accessing elastic search.
      */
-    QueryResponse searchByTitle(String title) throws IOException;
+    QueryResponse searchByParams(String[] title) throws IOException;
 }

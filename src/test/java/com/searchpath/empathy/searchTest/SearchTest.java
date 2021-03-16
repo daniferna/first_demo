@@ -17,7 +17,8 @@ public class SearchTest {
 
     private final IElasticUtil elasticUtil;
 
-    @Inject SearchTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
+    @Inject
+    SearchTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
         this.elasticUtil = elasticUtil;
     }
 
@@ -41,13 +42,13 @@ public class SearchTest {
         var expectedSpidermanFilm = new Film("tt0413300", "Spider-Man 3"
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
-        var response = elasticUtil.searchByTitle("Spiderman 3");
+        var response = elasticUtil.searchByParams(new String[]{"Spiderman 3", "", ""});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
 
-        response = elasticUtil.searchByTitle("Spiderman III");
+        response = elasticUtil.searchByParams(new String[]{"Spiderman III", "", ""});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
 
-        response = elasticUtil.searchByTitle("Spider-man III");
+        response = elasticUtil.searchByParams(new String[]{"Spider-man III", "", ""});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -65,7 +66,7 @@ public class SearchTest {
         var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
                 , "movie", "2017-01-01", null);
 
-        var response = elasticUtil.searchByTitle("Call me by your name");
+        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "", ""});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
@@ -88,7 +89,7 @@ public class SearchTest {
                 , new String[]{"Action", "Adventure", "Drama"}, "movie",
                 "2019-01-01", null);
 
-        var response = elasticUtil.searchByTitle("Avengers: Endgame");
+        var response = elasticUtil.searchByParams(new String[]{"Avengers: Endgame", "", ""});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 

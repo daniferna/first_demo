@@ -9,6 +9,8 @@ import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
+import org.apache.lucene.queryparser.xml.builders.BooleanQueryBuilder;
+import org.apache.lucene.search.BooleanQuery;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -17,6 +19,7 @@ import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -30,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +105,7 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * Helper method, creates a {@see Film} POJO from a line extracted from the data source.
+     *
      * @param line String containing the info of the film separated by tabs.
      * @return A Film POJO
      */
@@ -119,6 +122,7 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * Helper method, creates the index in elasticsearch using the IMDB Index json config file.
      * {<a href="file:../../../resources/mappingIMDBIndex.json"}
+     *
      * @throws IOException If an error occur while reading the config file.
      */
     private void createIndex() throws IOException {
@@ -128,7 +132,7 @@ public class ElasticClientUtil implements IElasticUtil {
                 .getResourceAsStream("mappingIMDBIndex.json"), "mapping JSON not found");
 
         Map<String, Object> map = objectMapper.readValue(json, Map.class);
-            json.close();
+        json.close();
 
         create.source(map);
 
@@ -165,23 +169,45 @@ public class ElasticClientUtil implements IElasticUtil {
      * Once the response is obtained, is processed by a private helper method {@link #getQueryResponse(SearchRequest)} )}
      * which transform the hits into {@link Film} objects.
      *
+     * @param params An String array containing the params of the search
      * @throws IOException If the method can't serialize the hit into a Film JSON or an error occur while searching
      *                     the query through the client.
      */
     @Override
-    public QueryResponse searchByTitle(String title) throws IOException {
+    public QueryResponse searchByParams(String[] params) throws IOException {
         var request = new SearchRequest("imdb");
 
-        var queryBuilder = new MatchQueryBuilder("title", title);
+        BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
+        buildBoolQuery(params, queryBuilder);
+
         request.source(getSearchSourceBuilder(queryBuilder));
 
         return getQueryResponse(request);
+    }
+
+    private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
+        MatchQueryBuilder matchTitleQueryBuilder, matchTypeQueryBuilder, matchGenreQueryBuilder;
+
+        if (params[0].length() >= 1) {
+            matchTitleQueryBuilder = new MatchQueryBuilder("title", params[0]);
+            queryBuilder.should(matchTitleQueryBuilder);
+        }
+        if (params[1].length() >= 1) {
+            matchGenreQueryBuilder = new MatchQueryBuilder("genres", params[1]);
+            queryBuilder.should(matchGenreQueryBuilder);
+        }
+        if (params[2].length() >= 1) {
+            matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);
+            queryBuilder.should(matchTypeQueryBuilder);
+        }
+
     }
 
 
     /**
      * Helper method, builds a {@see SearchSourceBuilder} from a {@see QueryBuilder} passed by params and then
      * configure it.
+     *
      * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
      * @return The SearchSourceBuilder properly configured.
      */
@@ -194,6 +220,7 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * Helper method, do the search request using the {@see ElasticClient} and transform the response into the
      * normalized response POJO {@see QueryResponse}.
+     *
      * @param request The pre-built SearchRequest that is gonna be called.
      * @return A QueryResponse POJO with the corresponding data retrieved from the response.
      * @throws IOException If there is a problem while performing the search request.
