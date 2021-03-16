@@ -10,11 +10,14 @@ public class QueryResponse {
 
     private final long total;
     private final Film[] items;
+    private final TermAggregationPojo[] aggregations;
 
     @JsonCreator()
-    public QueryResponse(@JsonProperty long total, @JsonProperty Film[] items) {
+    public QueryResponse(@JsonProperty long total, @JsonProperty Film[] items
+            , @JsonProperty TermAggregationPojo[] aggregations) {
         this.total = total;
         this.items = items;
+        this.aggregations = aggregations;
     }
 
     public long getTotal() {
@@ -25,11 +28,16 @@ public class QueryResponse {
         return items;
     }
 
+    public TermAggregationPojo[] getAggregations() {
+        return aggregations;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", QueryResponse.class.getSimpleName() + "[", "]")
                 .add("total=" + total)
                 .add("items=" + Arrays.toString(items))
+                .add("aggregations=" + Arrays.toString(aggregations))
                 .toString();
     }
 }
