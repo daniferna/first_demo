@@ -2,15 +2,15 @@
   "mappings": {
     "properties": {
       "title": {
-        "type": "keyword",
+        "type": "text",
         "search_analyzer": "title_search_analyzer",
         "analyzer": "title_analyzer"
       },
       "genres": {
-        "type": "text"
+        "type": "keyword"
       },
       "type": {
-        "type": "text"
+        "type": "keyword"
       },
       "start_year": {
         "type": "date",

@@ -2,6 +2,7 @@ package com.searchpath.empathy.elastic.util.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
@@ -9,8 +10,8 @@ import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
-import org.apache.lucene.queryparser.xml.builders.BooleanQueryBuilder;
-import org.apache.lucene.search.BooleanQuery;
+import com.searchpath.empathy.pojo.TermAggregationPojo;
+import com.searchpath.empathy.pojo.TermBucketPojo;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -24,6 +25,8 @@ import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
@@ -213,8 +216,26 @@ public class ElasticClientUtil implements IElasticUtil {
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
         var sourceBuilder = new SearchSourceBuilder();
+
         sourceBuilder.size(10);
+        addAggregations(sourceBuilder);
+
         return sourceBuilder.query(queryBuilder);
+    }
+
+    /**
+     * Helper method which adds aggregations to the sourceBuilder
+     *
+     * @param sourceBuilder The sourceBuilder to be modified
+     */
+    private void addAggregations(SearchSourceBuilder sourceBuilder) {
+        var aggTermsGenresBuilder = AggregationBuilders.terms("genres");
+        var aggTypeTermsBuilder = AggregationBuilders.terms("types");
+
+        aggTermsGenresBuilder.field("genres");
+        aggTypeTermsBuilder.field("type");
+
+        sourceBuilder.aggregation(aggTermsGenresBuilder).aggregation(aggTypeTermsBuilder);
     }
 
     /**
@@ -231,9 +252,39 @@ public class ElasticClientUtil implements IElasticUtil {
         long total = response.getHits().getTotalHits().value;
         Film[] films = parseHitToFilms(response.getHits());
 
-        return new QueryResponse(total, films);
+        objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, true);
+
+        Terms genres = response.getAggregations().get("genres");
+        Terms types = response.getAggregations().get("types");
+
+        TermAggregationPojo[] aggregationPojos = new TermAggregationPojo[2];
+        aggregationPojos[0] = getTermAggregationPojo(genres.getBuckets(), "genres");
+        aggregationPojos[1] = getTermAggregationPojo(types.getBuckets(), "types");
+
+        return new QueryResponse(total, films, aggregationPojos);
     }
 
+    /**
+     * @param buckets The original buckets from Elastic Search
+     * @param name The name of the Term Aggregation POJO to be returned
+     * @return A Term Aggregation POJO with the name and buckets received throught params {@see TermAggregationPojo}
+     */
+    private TermAggregationPojo getTermAggregationPojo(List<? extends Terms.Bucket> buckets, String name) {
+        var termBuckets = transformBucketToPojo(buckets);
+        return new TermAggregationPojo(name, termBuckets);
+    }
+
+    /**
+     * Helper method, transform and original bucket into a serializable POJO bucket.
+     *
+     * @param originalBuckets Original bucket from Elastic Search
+     * @return POJO bucket {@see TermBucketPojo}
+     */
+    private TermBucketPojo[] transformBucketToPojo(List<? extends Terms.Bucket> originalBuckets) {
+        return originalBuckets.stream()
+                .map(bucket -> new TermBucketPojo(bucket.getKeyAsString(), bucket.getDocCount()
+                )).toArray(TermBucketPojo[]::new);
+    }
 
     /**
      * Helper method which transforms the elastic search response hits into Film objects.
