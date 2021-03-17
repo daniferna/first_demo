@@ -13,12 +13,12 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
-public class SearchTest {
+public class SearchItemsTest {
 
     private final IElasticUtil elasticUtil;
 
     @Inject
-    SearchTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
+    SearchItemsTest(@Named("ElasticClientUtil") IElasticUtil elasticUtil) {
         this.elasticUtil = elasticUtil;
     }
 
