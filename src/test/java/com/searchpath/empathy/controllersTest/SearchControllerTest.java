@@ -55,6 +55,38 @@ public class SearchControllerTest {
     }
 
     @Test
+    public void testSearchByTitleAndType() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET("/search?title=Avengers&type=documentary");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchByParams(new String[]{"Avengers", "", "documentary"});
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchByTypeAndGenre() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET("/search?type=documentary&genre=Drama");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchByParams(new String[]{"", "drama", "documentary"});
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchByTitleGenreAndType() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET(
+                "/search?title=The+Simpsons&type=tvSeries&genre=animation,comedy");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchByParams(
+                new String[]{"The Simpsons", "animation,comedy", "tvSeries"});
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
     public void testSearchWithoutQueryParam() {
         HttpRequest<String> request = HttpRequest.GET("/search");
 

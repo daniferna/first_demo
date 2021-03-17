@@ -7,10 +7,12 @@
         "analyzer": "title_analyzer"
       },
       "genres": {
-        "type": "keyword"
+        "type": "keyword",
+        "normalizer": "keyword_normalizer"
       },
       "type": {
-        "type": "keyword"
+        "type": "keyword",
+        "normalizer": "keyword_normalizer"
       },
       "start_year": {
         "type": "date",
@@ -24,6 +26,13 @@
   },
   "settings": {
     "analysis": {
+      "normalizer": {
+        "keyword_normalizer": {
+          "type": "custom",
+          "char_filter": [],
+          "filter": ["lowercase", "asciifolding"]
+        }
+      },
       "analyzer": {
         "title_search_analyzer": {
           "type": "custom",

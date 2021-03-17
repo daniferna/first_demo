@@ -53,6 +53,26 @@ public class SearchTest {
     }
 
     @Test
+    public void testSearchTitleAndGenreSpiderman() throws IOException {
+        var expectedSpidermanFilm = new Film("tt0413300", "Spider-Man 3"
+                , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi", ""});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
+    }
+
+    @Test
+    public void testSearchTitleGenreAndTypeSpiderman() throws IOException {
+        var expectedSpidermanFilm = new Film("tt0413300", "Spider-Man 3"
+                , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi", "movie"});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
+    }
+
+    @Test
     public void testSearchQueryStandardFilm() throws IOException {
         var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
                 , "movie", "2017-01-01", null);
@@ -67,6 +87,25 @@ public class SearchTest {
                 , "movie", "2017-01-01", null);
 
         var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "", ""});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchTitleAndGenreStandardFilm() throws IOException {
+        var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
+                , "movie", "2017-01-01", null);
+
+        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "Drama, romance", ""});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchTitleGenreAndTypeStandardFilm() throws IOException {
+        var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
+                , "movie", "2017-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Call me by your name", "Drama,romance", "movie"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
@@ -90,6 +129,27 @@ public class SearchTest {
                 "2019-01-01", null);
 
         var response = elasticUtil.searchByParams(new String[]{"Avengers: Endgame", "", ""});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchTitleAndTypeMassiveFilm() throws IOException {
+        var expectedFilm = new Film("tt4154796", "Avengers: Endgame"
+                , new String[]{"Action", "Adventure", "Drama"}, "movie",
+                "2019-01-01", null);
+
+        var response = elasticUtil.searchByParams(new String[]{"Avengers: Endgame", "", "movie"});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchTitleGenreAndTypeMassiveFilm() throws IOException {
+        var expectedFilm = new Film("tt4154796", "Avengers: Endgame"
+                , new String[]{"Action", "Adventure", "Drama"}, "movie",
+                "2019-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Avengers: Endgame", "Action,Adventure,Drama", "movie"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
