@@ -27,14 +27,16 @@ public class SearchController extends BaseController{
      * @param query,title The String the petition shall contain with the query info
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
      */
-    @Get("{?query}{?title,genre,type}")
+    @Get("{?query}{?title,genre,type,date}")
     public HttpResponse<QueryResponse> search(Optional<String> query, Optional<String> title,
-                                              Optional<String> genre, Optional<String> type) throws IOException {
+                                              Optional<String> genre, Optional<String> type,
+                                              Optional<String> date) throws IOException {
 
         if (query.isPresent())
             return HttpResponse.ok(elasticUtil.search(query.get()));
-        else if (title.isPresent() || genre.isPresent() || type.isPresent()){
-            var params = new String[] {title.orElse(""), genre.orElse(""), type.orElse("")};
+        else if (title.isPresent() || genre.isPresent() || type.isPresent() || date.isPresent()){
+            var params = new String[] {title.orElse(""), genre.orElse(""),
+                    type.orElse(""), date.orElse("")};
             return HttpResponse.ok(elasticUtil.searchByParams(params));
         }
 

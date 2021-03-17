@@ -20,10 +20,7 @@ import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -203,6 +200,16 @@ public class ElasticClientUtil implements IElasticUtil {
             matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);
             queryBuilder.should(matchTypeQueryBuilder);
         }
+        if (params[3].length() >= 1 && params[3].matches("([0-9]{4}-[0-9]{4},*)+")) {
+            var dates = params[3].split(",");
+            var years = dates[0].split("-");
+            var rangeQueryBuilder = new RangeQueryBuilder("start_year");
+            rangeQueryBuilder.format("yyyy");
+            rangeQueryBuilder.gte(years[0]);
+            rangeQueryBuilder.lte(years[1]);
+            queryBuilder.must(rangeQueryBuilder);
+
+        }
 
     }
 
@@ -266,7 +273,7 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * @param buckets The original buckets from Elastic Search
-     * @param name The name of the Term Aggregation POJO to be returned
+     * @param name    The name of the Term Aggregation POJO to be returned
      * @return A Term Aggregation POJO with the name and buckets received throught params {@see TermAggregationPojo}
      */
     private TermAggregationPojo getTermAggregationPojo(List<? extends Terms.Bucket> buckets, String name) {

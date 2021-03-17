@@ -28,7 +28,7 @@ public class IndexController extends BaseController {
      * @throws IOException If something went wrong
      */
     @Get
-    public HttpResponse<String> index() throws IOException, ParseException {
-        return HttpResponse.ok(elasticUtil.loadIMDBData());
+    public String index() throws IOException, ParseException {
+        return elasticUtil.loadIMDBData();
     }
 }
