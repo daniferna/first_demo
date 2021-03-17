@@ -36,7 +36,8 @@ public class SearchAggregationsTest {
     public void testSearchWithParams() throws IOException {
         String expectedAggregations = "[{\"genres\":[{\"drama\":217646},{\"comedy\":115620},{\"documentary\":110763},{\"action\":51316},{\"romance\":45133},{\"thriller\":38846},{\"crime\":35524},{\"horror\":32355},{\"adventure\":28384},{\"short\":21110}]},{\"types\":[{\"movie\":569618},{\"tvepisode\":46545},{\"short\":13943},{\"video\":9787},{\"tvseries\":2783},{\"tvmovie\":1488},{\"tvminiseries\":446},{\"tvspecial\":402},{\"videogame\":201},{\"tvshort\":127}]}]";
 
-        var response = elasticUtil.searchByParams(new String[] {"Call me by your name", "drama,romance", "movie"});
+        var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
+                "drama,romance", "movie"});
         assertEquals(objectMapper.writeValueAsString(response.getAggregations()), expectedAggregations);
     }
 

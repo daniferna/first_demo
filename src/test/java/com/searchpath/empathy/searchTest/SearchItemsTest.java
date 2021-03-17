@@ -10,6 +10,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
@@ -42,13 +43,13 @@ public class SearchItemsTest {
         var expectedSpidermanFilm = new Film("tt0413300", "Spider-Man 3"
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
-        var response = elasticUtil.searchByParams(new String[]{"Spiderman 3", "", ""});
+        var response = elasticUtil.searchByParams(new String[]{"Spiderman 3"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
 
-        response = elasticUtil.searchByParams(new String[]{"Spiderman III", "", ""});
+        response = elasticUtil.searchByParams(new String[]{"Spiderman III"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
 
-        response = elasticUtil.searchByParams(new String[]{"Spider-man III", "", ""});
+        response = elasticUtil.searchByParams(new String[]{"Spider-man III"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -58,7 +59,7 @@ public class SearchItemsTest {
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi", ""});
+                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -86,7 +87,7 @@ public class SearchItemsTest {
         var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
                 , "movie", "2017-01-01", null);
 
-        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "", ""});
+        var response = elasticUtil.searchByParams(new String[]{"Call me by your name"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
@@ -95,7 +96,7 @@ public class SearchItemsTest {
         var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
                 , "movie", "2017-01-01", null);
 
-        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "Drama, romance", ""});
+        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "Drama, romance"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
@@ -107,6 +108,26 @@ public class SearchItemsTest {
         var response = elasticUtil.searchByParams(
                 new String[]{"Call me by your name", "Drama,romance", "movie"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchCorrectDateStandardFilm() throws IOException {
+        var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
+                , "movie", "2017-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Call me by your name", "Drama,romance", "movie", "2016-2018"});
+        assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
+    }
+
+    @Test
+    public void testSearchIncorrectDateStandardFilm() throws IOException {
+        var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
+                , "movie", "2017-01-01", null);
+
+        var response = elasticUtil.searchByParams(
+                new String[]{"Call me by your name", "Drama,romance", "movie", "2010-2013,2000-2004"});
+        assertFalse(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
     @Test
@@ -128,7 +149,7 @@ public class SearchItemsTest {
                 , new String[]{"Action", "Adventure", "Drama"}, "movie",
                 "2019-01-01", null);
 
-        var response = elasticUtil.searchByParams(new String[]{"Avengers: Endgame", "", ""});
+        var response = elasticUtil.searchByParams(new String[]{"Avengers: Endgame"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 

@@ -33,10 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Class containing helper methods to interact with the Elastic Client.
@@ -187,6 +184,10 @@ public class ElasticClientUtil implements IElasticUtil {
 
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
         MatchQueryBuilder matchTitleQueryBuilder, matchTypeQueryBuilder, matchGenreQueryBuilder;
+
+        //Make sure the array has the appropriate length
+        params = Arrays.stream(Arrays.copyOf(params,4))
+                .map(str -> str == null ? "" : str).toArray(String[]::new);
 
         if (params[0].length() >= 1) {
             matchTitleQueryBuilder = new MatchQueryBuilder("title", params[0]);

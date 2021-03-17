@@ -50,7 +50,7 @@ public class SearchControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchByParams(new String[]{"Avengers", "", ""});
+        var expectedResponse = elasticUtil.searchByParams(new String[]{"Avengers"});
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -83,6 +83,30 @@ public class SearchControllerTest {
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchByParams(
                 new String[]{"The Simpsons", "animation,comedy", "tvSeries"});
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchByTitleGenreTypeAndDate() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET(
+                "/search?title=The+Simpsons&type=tvSeries&genre=animation,comedy&date=2000-2015");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchByParams(
+                new String[]{"The Simpsons", "animation,comedy", "tvSeries", "2000-2015"});
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchByMultipleDate() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET(
+                "/search?title=The+Simpsons&type=tvSeries&date=2000-2015,1990-1998");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var expectedResponse = elasticUtil.searchByParams(
+                new String[]{"The Simpsons", "animation,comedy", "tvSeries", "2000-2015,1990-1998"});
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
