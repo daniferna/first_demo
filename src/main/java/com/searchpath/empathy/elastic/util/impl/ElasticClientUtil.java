@@ -64,8 +64,8 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     /**
-     * This implementation reads the file {@see #readFile(InputStream)} and then, it divides the entry into chunks
-     * of 50.000 lines with the help of the Guava's Iterators library help. {@see Iterators#partition(Iterator, int)}
+     * This implementation reads the file {@link #readFile(InputStream)} and then, it divides the entry into chunks
+     * of 50.000 lines with the help of the Guava's Iterators library help. {@link Iterators#partition(Iterator, int)}
      * <p>
      * Following that, read each chunk and proceeds to create a {@link Film} object which is then deserialized into
      * a Json and added to a {@link BulkRequest}. Next step is take the elastic search client and upload this bulk.
@@ -104,7 +104,7 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     /**
-     * Helper method, creates a {@see Film} POJO from a line extracted from the data source.
+     * Helper method, creates a {@link Film} POJO from a line extracted from the data source.
      *
      * @param line String containing the info of the film separated by tabs.
      * @return A Film POJO
@@ -201,21 +201,37 @@ public class ElasticClientUtil implements IElasticUtil {
             queryBuilder.should(matchTypeQueryBuilder);
         }
         if (params[3].length() >= 1 && params[3].matches("([0-9]{4}-[0-9]{4},*)+")) {
-            var dates = params[3].split(",");
-            var years = dates[0].split("-");
-            var rangeQueryBuilder = new RangeQueryBuilder("start_year");
-            rangeQueryBuilder.format("yyyy");
-            rangeQueryBuilder.gte(years[0]);
-            rangeQueryBuilder.lte(years[1]);
-            queryBuilder.must(rangeQueryBuilder);
-
+            BoolQueryBuilder boolQueryBuilder = buildDateQuery(params[3]);
+            queryBuilder.must(boolQueryBuilder);
         }
 
     }
 
+    /**
+     * Helper method, transform a valid date param into a {@link BoolQueryBuilder} containing
+     * various {@link RangeQueryBuilder}, united by the should clause.
+     * @param paramDates String containing a valid succession of date ranges (following regex: ([0-9]{4}-[0-9]{4},*)+
+     * @return A BoolQueryBuilder containing various RangeQueryBuilder
+     */
+    private BoolQueryBuilder buildDateQuery(String paramDates) {
+        var dates = paramDates.split(",");
+        var boolQueryBuilder = new BoolQueryBuilder();
+
+        for (var date : dates) {
+            var years = date.split("-");
+            var rangeQueryBuilder = new RangeQueryBuilder("start_year");
+            rangeQueryBuilder.format("yyyy");
+            rangeQueryBuilder.gte(years[0]);
+            rangeQueryBuilder.lte(years[1]);
+            boolQueryBuilder.should(rangeQueryBuilder);
+        }
+        
+        return boolQueryBuilder;
+    }
+
 
     /**
-     * Helper method, builds a {@see SearchSourceBuilder} from a {@see QueryBuilder} passed by params and then
+     * Helper method, builds a {@link SearchSourceBuilder} from a {@link QueryBuilder} passed by params and then
      * configure it.
      *
      * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
@@ -246,8 +262,8 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     /**
-     * Helper method, do the search request using the {@see ElasticClient} and transform the response into the
-     * normalized response POJO {@see QueryResponse}.
+     * Helper method, do the search request using the {@link ElasticClient} and transform the response into the
+     * normalized response POJO {@link QueryResponse}.
      *
      * @param request The pre-built SearchRequest that is gonna be called.
      * @return A QueryResponse POJO with the corresponding data retrieved from the response.
@@ -274,7 +290,7 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * @param buckets The original buckets from Elastic Search
      * @param name    The name of the Term Aggregation POJO to be returned
-     * @return A Term Aggregation POJO with the name and buckets received throught params {@see TermAggregationPojo}
+     * @return A Term Aggregation POJO with the name and buckets received throught params {@link TermAggregationPojo}
      */
     private TermAggregationPojo getTermAggregationPojo(List<? extends Terms.Bucket> buckets, String name) {
         var termBuckets = transformBucketToPojo(buckets);
@@ -285,7 +301,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * Helper method, transform and original bucket into a serializable POJO bucket.
      *
      * @param originalBuckets Original bucket from Elastic Search
-     * @return POJO bucket {@see TermBucketPojo}
+     * @return POJO bucket {@link TermBucketPojo}
      */
     private TermBucketPojo[] transformBucketToPojo(List<? extends Terms.Bucket> originalBuckets) {
         return originalBuckets.stream()
@@ -297,7 +313,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * Helper method which transforms the elastic search response hits into Film objects.
      *
      * @param hits The hits of the search
-     * @return An array of films {@see Film}
+     * @return An array of films {@link Film}
      */
     private Film[] parseHitToFilms(SearchHits hits) {
         return Arrays.stream(hits.getHits()).map(hit -> {
