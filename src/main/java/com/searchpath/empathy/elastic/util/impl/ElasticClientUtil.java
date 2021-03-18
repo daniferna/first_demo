@@ -24,8 +24,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
@@ -303,11 +303,21 @@ public class ElasticClientUtil implements IElasticUtil {
         return new QueryResponse(total, films, termAggregations, dateHistogramAggregation);
     }
 
+    /**
+     * @param buckets The original buckets from Elastic Search
+     * @return A Date Histogram Aggregation POJO with the buckets received through params {@link Aggregation<DateHistogramBucket>}
+     */
     private Aggregation<DateHistogramBucket> getDateHistogramAggregationPojo(List<? extends Histogram.Bucket> buckets) {
         var dateHistogramBuckets = transformDateHistogramBucketsToPojo(buckets);
         return new Aggregation<>("decades", dateHistogramBuckets);
     }
 
+    /**
+     * Helper method, transform original bucket into a serializable POJO bucket.
+     *
+     * @param originalBuckets Original bucket from Elastic Search
+     * @return POJO bucket {@link DateHistogramBucket}
+     */
     private DateHistogramBucket[] transformDateHistogramBucketsToPojo(List<? extends Histogram.Bucket> originalBuckets) {
         return originalBuckets.stream()
                 .map(bucket -> new DateHistogramBucket(bucket.getDocCount(), bucket.getKeyAsString()))
@@ -317,7 +327,7 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * @param buckets The original buckets from Elastic Search
      * @param name    The name of the Term Aggregation POJO to be returned
-     * @return A Term Aggregation POJO with the name and buckets received throught params {@link Aggregation}
+     * @return A Term Aggregation POJO with the name and buckets received through params {@link Aggregation<TermBucket>}
      */
     private Aggregation<TermBucket> getTermAggregationPojo(List<? extends Terms.Bucket> buckets, String name) {
         var termBuckets = transformTermBucketsToPojo(buckets);
@@ -325,7 +335,7 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     /**
-     * Helper method, transform and original bucket into a serializable POJO bucket.
+     * Helper method, transform original bucket into a serializable POJO bucket.
      *
      * @param originalBuckets Original bucket from Elastic Search
      * @return POJO bucket {@link TermBucket}
