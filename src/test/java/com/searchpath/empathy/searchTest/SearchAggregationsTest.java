@@ -29,7 +29,7 @@ public class SearchAggregationsTest {
         String expectedAggregations = "[{\"genres\":[{\"short\":21071},{\"comedy\":19647},{\"drama\":16065},{\"documentary\":8669},{\"adult\":8398},{\"talk-show\":7703},{\"music\":7695},{\"animation\":5295},{\"reality-tv\":4687},{\"family\":4375}]},{\"types\":[{\"tvepisode\":46545},{\"short\":13943},{\"video\":9787},{\"movie\":7209},{\"tvseries\":2783},{\"tvmovie\":1488},{\"tvminiseries\":446},{\"tvspecial\":402},{\"videogame\":201},{\"tvshort\":127}]}]";
 
         var response = elasticUtil.search("Call me by your name");
-        assertEquals(objectMapper.writeValueAsString(response.getAggregations()), expectedAggregations);
+        assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class SearchAggregationsTest {
 
         var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
                 "drama,romance", "movie"});
-        assertEquals(objectMapper.writeValueAsString(response.getAggregations()), expectedAggregations);
+        assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
     }
 
 }

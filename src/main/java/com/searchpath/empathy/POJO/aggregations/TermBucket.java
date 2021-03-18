@@ -1,20 +1,20 @@
-package com.searchpath.empathy.pojo;
+package com.searchpath.empathy.pojo.aggregations;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.searchpath.empathy.pojo.serializers.TermBucketSerializer;
+import com.searchpath.empathy.pojo.aggregations.serializers.BucketSerializer;
 
 import java.util.StringJoiner;
 
-@JsonSerialize(using = TermBucketSerializer.class)
-public class TermBucketPojo {
+@JsonSerialize(using = BucketSerializer.class)
+public class TermBucket implements IBucket {
 
     private final String name;
     private final Long count;
 
     @JsonCreator
-    public TermBucketPojo(@JsonProperty String name, @JsonProperty  long count) {
+    public TermBucket(@JsonProperty String name, @JsonProperty long count) {
         this.name = name;
         this.count = count;
     }
@@ -23,13 +23,13 @@ public class TermBucketPojo {
         return name;
     }
 
-    public Long getCount() {
+    public long getCount() {
         return count;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", TermBucketPojo.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", TermBucket.class.getSimpleName() + "[", "]")
                 .add("name='" + name + "'")
                 .add("count=" + count)
                 .toString();
