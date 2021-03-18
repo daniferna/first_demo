@@ -268,6 +268,7 @@ public class ElasticClientUtil implements IElasticUtil {
         aggDateHistogramBuilder.fixedInterval(new DateHistogramInterval("315581500s"));
         aggDateHistogramBuilder.format("yyyy");
         aggDateHistogramBuilder.minDocCount(0);
+        aggDateHistogramBuilder.offset("6h");
 
         sourceBuilder.aggregation(aggTermsGenresBuilder).aggregation(aggTypeTermsBuilder)
                 .aggregation(aggDateHistogramBuilder);
