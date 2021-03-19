@@ -1,10 +1,9 @@
-package com.searchpath.empathy.pojo.aggregations.serializers;
+package com.searchpath.empathy.pojo.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.searchpath.empathy.pojo.aggregations.IBucket;
-import com.searchpath.empathy.pojo.aggregations.TermBucket;
+import com.searchpath.empathy.pojo.aggregations.bucket.IBucket;
 
 import java.io.IOException;
 

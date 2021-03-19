@@ -1,9 +1,10 @@
-package com.searchpath.empathy.pojo.aggregations;
+package com.searchpath.empathy.pojo.aggregations.bucket.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.searchpath.empathy.pojo.aggregations.serializers.BucketSerializer;
+import com.searchpath.empathy.pojo.aggregations.bucket.IBucket;
+import com.searchpath.empathy.pojo.serializers.BucketSerializer;
 
 import java.util.StringJoiner;
 

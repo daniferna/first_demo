@@ -3,7 +3,7 @@ package com.searchpath.empathy.pojo.aggregations;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.searchpath.empathy.pojo.aggregations.serializers.AggregationSerializer;
+import com.searchpath.empathy.pojo.serializers.AggregationSerializer;
 
 import java.util.Arrays;
 import java.util.StringJoiner;

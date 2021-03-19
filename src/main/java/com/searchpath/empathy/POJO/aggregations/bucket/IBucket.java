@@ -1,4 +1,4 @@
-package com.searchpath.empathy.pojo.aggregations;
+package com.searchpath.empathy.pojo.aggregations.bucket;
 
 public interface IBucket {
 

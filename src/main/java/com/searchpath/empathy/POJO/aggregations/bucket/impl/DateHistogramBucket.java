@@ -1,7 +1,8 @@
-package com.searchpath.empathy.pojo.aggregations;
+package com.searchpath.empathy.pojo.aggregations.bucket.impl;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.searchpath.empathy.pojo.aggregations.serializers.BucketSerializer;
+import com.searchpath.empathy.pojo.aggregations.bucket.IBucket;
+import com.searchpath.empathy.pojo.serializers.BucketSerializer;
 
 import java.util.StringJoiner;
 
@@ -18,7 +19,7 @@ public class DateHistogramBucket implements IBucket {
 
     @Override
     public String getName() {
-        return decade;
+        return getDecade();
     }
 
     public long getCount() {

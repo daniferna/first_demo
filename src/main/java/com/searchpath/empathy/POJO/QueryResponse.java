@@ -2,13 +2,18 @@ package com.searchpath.empathy.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.searchpath.empathy.pojo.aggregations.Aggregation;
-import com.searchpath.empathy.pojo.aggregations.DateHistogramBucket;
-import com.searchpath.empathy.pojo.aggregations.TermBucket;
+import com.searchpath.empathy.pojo.aggregations.bucket.impl.DateHistogramBucket;
+import com.searchpath.empathy.pojo.aggregations.bucket.impl.TermBucket;
+import com.searchpath.empathy.pojo.serializers.QueryResponseSerializer;
 
 import java.util.Arrays;
 import java.util.StringJoiner;
 
+import static java.lang.System.arraycopy;
+
+@JsonSerialize(using = QueryResponseSerializer.class)
 public class QueryResponse {
 
     private final long total;
@@ -36,6 +41,17 @@ public class QueryResponse {
 
     public Aggregation<TermBucket>[] getTermAggregations() {
         return termAggregations;
+    }
+
+    /**
+     * Method that return all aggregations in a unique array.
+     * @return An array containing all the aggregations of this response.
+     */
+    public Aggregation<?>[] getAggregations() {
+        Aggregation<?>[] allAggregations = new Aggregation[termAggregations.length+1];
+        arraycopy(termAggregations, 0, allAggregations, 0, termAggregations.length);
+        allAggregations[termAggregations.length] = dateHistogramAggregation;
+        return allAggregations;
     }
 
     public Aggregation<DateHistogramBucket> getDateHistogramAggregation() {
