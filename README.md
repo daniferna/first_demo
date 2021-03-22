@@ -21,6 +21,7 @@ To start using the search engine we need to deploy our elasticsearch engine. Thi
 ```bash   
 docker pull docker.elastic.co/elasticsearch/elasticsearch:7.11.1
 ```
+
 2. Deploy this image using the ports 9200 and 9300:<br/>
 
 ```bash   
@@ -68,7 +69,9 @@ Once the index process is finished you will see a "success" message appear in th
 while, so be patient. It normally takes less than 10 minutes, but it depends on the computer.
 
 ## Types of fields
+
 The indexed data has the following types and values:
+
 * Title: text
 * Type: text
     * Possible values:
@@ -120,8 +123,6 @@ The indexed data has the following types and values:
         * yyyy-yyyy,...
         * Example:<br/>
           1980-1990 <br/>or<br/> 1980-1990, 2000-2010,...
-    
-    
 
 ## What can you do with the API
 
@@ -134,35 +135,39 @@ or
 > http:localhost:8080/search?*title=Spiderman+3&type=movie*
 
 ### Types of search
+
 Right now, you can do the following types of queries:
 
-#### Search by query:
-    * This kind of search receive a piece of text and performs a general search trying to extract and match all the
-      elements of the query with the info elasticsearch has saved.
-    * Example:
+#### Search by query
+
+* This kind of search receive a piece of text and performs a general search trying to extract and match all the elements
+  of the query with the info elasticsearch has saved.
+* Example:
   > http:localhost:8080/search?query=Spiderman+movie
 
-#### Search by fields:
-    * This kind of search looks specifically for the fields passed by parameters. Gives better results than the general
-      query if you know the values and type of the elements you're passing by parameters.
-    * The fields can be combined
-    * The fields can be the following:
-        * title
-        * type
-        * genre 
-            * one or more values separated by commas
-        * date
-            * one or more range of years separated by commas
-    
+#### Search by fields
+
+* This kind of search looks specifically for the fields passed by parameters. Gives better results than the general
+  query if you know the values and type of the elements you're passing by parameters.
+* The fields can be combined
+* The fields can be the following:
+    * title
+    * type
+    * genre
+        * one or more values separated by commas
+    * date
+        * one or more range of years separated by commas
+
 ##### Examples of search by fields:
+
 Films titled "Spiderman 3"
 > /search?title=Spiderman+3&type=movie
-  
+
 Media titled "The great adevnture" of genre drama and adventure
 > /search?title=The+great+adventure&genre=drama,adventure
-  
+
 Film titled "Call me by your name" of genre drama and romance released between 2010 and 2020
 > /search?title=Call+me+by+your+name&type=movie&genre=drama,romance&date=2010-2020
- 
+
 Film of genre drama released between 2010 and 2013, and between 1980 and 1995
 > /search?genre=drama&date=2010-2013,1980-1995
