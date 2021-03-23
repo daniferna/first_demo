@@ -14,7 +14,7 @@ public class DateHistogramBucket implements IBucket {
 
     public DateHistogramBucket(long docCount, String key) {
         this.count = docCount;
-        this.decade = key + "-" + (Integer.parseInt(key)+10);
+        this.decade = Integer.parseInt(key)+1 + "-" + (Integer.parseInt(key)+10);
     }
 
     @Override
