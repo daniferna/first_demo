@@ -19,6 +19,10 @@ public class Film {
     private final String type;
     private final String start_year;
     private final String end_year;
+    @JsonProperty("average_rating")
+    private float average_rating;
+    @JsonProperty("num_votes")
+    private int num_votes;
 
     @JsonCreator()
     public Film(@JsonProperty("id") String id,
@@ -47,16 +51,32 @@ public class Film {
         return genres;
     }
 
-    public String getStartYear() {
+    public String getStart_year() {
         return start_year;
     }
 
-    public String getEndYear() {
+    public String getEnd_year() {
         return end_year;
     }
 
     public String getType() {
         return type;
+    }
+
+    public float getAverage_rating() {
+        return average_rating;
+    }
+
+    public void setAverage_rating(float average_rating) {
+        this.average_rating = average_rating;
+    }
+
+    public int getNum_votes() {
+        return num_votes;
+    }
+
+    public void setNum_votes(int num_votes) {
+        this.num_votes = num_votes;
     }
 
     @Override

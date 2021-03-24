@@ -2,10 +2,13 @@ package com.searchpath.empathy.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Rating {
 
     private final String id;
