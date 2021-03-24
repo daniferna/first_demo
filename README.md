@@ -44,8 +44,8 @@ petitions to elasticsearch.
 
 ### Indexing the IMDB data
 
-We use the IMDB data available at https://datasets.imdbws.com, more specifically the *title.basics.tsv.gz*. This dataset
-includes information as:
+We use the IMDB data available at https://datasets.imdbws.com, more specifically the *title.basics.tsv.gz* and 
+_title.ratings.tsv.gz_. This dataset includes information as:
 
 * Title of the media
 * Type of media
@@ -55,7 +55,8 @@ includes information as:
 
 In order to index this information on elasticsearch we need to follow the next steps:
 
-1. Make sure you have the appropriate dataset file in the **/src/resources** folder named as **data.tsv**
+1. Make sure you have all the appropriate dataset files in the **/src/resources** folder named as **films.tsv** and
+   **ratings.tsv**
 2. Open a terminal and execute the following:<br/>
 
 ```bash
@@ -68,9 +69,13 @@ Or, as an alternative, open a web browser and go to the following url:
 Once the index process is finished you will see a "success" message appear in the bash or the browser. It can take a
 while, so be patient. It normally takes less than 10 minutes, but it depends on the computer.
 
+Is also possible to index just one of those datasets, this can be done through the API calls:
+* /index/films
+* /index/ratings
+
 ## Types of fields
 
-The indexed data has the following types and values:
+The indexed data fit for search has the following types and values:
 
 * Title: text
 * Type: text
@@ -123,10 +128,11 @@ The indexed data has the following types and values:
         * yyyy-yyyy,...
         * Example:<br/>
           1980-1990 <br/>or<br/> 1980-1990, 2000-2010,...
+    * Internally saved as *start_year*
 
 ## What can you do with the API
 
-All the calls to the API are HTTP GET calls being listened at /search. The parameteres of the call are passed by queries
+All the calls to the API are HTTP GET calls being listened at /search. The parameters of the call are passed by queries
 at the url:
 > http:localhost:8080/search?query=*text*
 
@@ -163,7 +169,7 @@ Right now, you can do the following types of queries:
 Films titled "Spiderman 3"
 > /search?title=Spiderman+3&type=movie
 
-Media titled "The great adevnture" of genre drama and adventure
+Media titled "The great adventure" of genre drama and adventure
 > /search?title=The+great+adventure&genre=drama,adventure
 
 Film titled "Call me by your name" of genre drama and romance released between 2010 and 2020

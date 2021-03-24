@@ -21,6 +21,12 @@
       "end_year": {
         "type": "date",
         "format": "year_month_day"
+      },
+      "average_rating": {
+        "type": "float"
+      },
+      "num_votes": {
+        "type": "integer"
       }
     }
   },
