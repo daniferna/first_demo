@@ -7,15 +7,18 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
 import com.searchpath.empathy.elastic.ElasticClient;
+import com.searchpath.empathy.elastic.commands.Command;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
+import com.searchpath.empathy.pojo.Rating;
 import com.searchpath.empathy.pojo.aggregations.Aggregation;
 import com.searchpath.empathy.pojo.aggregations.bucket.impl.DateHistogramBucket;
 import com.searchpath.empathy.pojo.aggregations.bucket.impl.TermBucket;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -36,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -65,10 +69,11 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * This implementation reads the file {@link #readFile(InputStream)} and then, it divides the entry into chunks
-     * of 50.000 lines with the help of the Guava's Iterators library help. {@link Iterators#partition(Iterator, int)}
+     * of several lines with the help of the Guava's Iterators library help. {@link Iterators#partition(Iterator, int)}
      * <p>
-     * Following that, read each chunk and proceeds to create a {@link Film} object which is then deserialized into
+     * Following that, read each chunk and proceeds to create a object which is then deserialized into
      * a Json and added to a {@link BulkRequest}. Next step is take the elastic search client and upload this bulk.
+     * For doing that, the method receive {@link Command} containing all the logic necessary in that case.
      * <p>
      * This is repeat for every chunk.
      *
@@ -76,23 +81,21 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     or an error occur while loading the bulk data through the client.
      */
     @Override
-    public String loadIMDBData() throws IOException {
+    public String loadIMDBMedia(String fileName, int chunkSize, Command command) throws IOException {
         if (!client.getClient().indices().exists(new GetIndexRequest("imdb"), RequestOptions.DEFAULT))
             createIndex();
 
-        var reader = readFile(this.getClass().getClassLoader().getResourceAsStream("data.tsv"));
+        var reader = readFile(this.getClass().getClassLoader().getResourceAsStream(fileName));
         var bulk = new BulkRequest();
 
-        // Split the data stream in chunks of 10.000 lines in a lazy way.
-        UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().skip(1).iterator(), 10000);
+        // Split the data stream in chunks in a lazy way.
+        UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().skip(1).iterator(), chunkSize);
 
         while (linesList.hasNext()) {
             List<String> list = linesList.next();
 
             for (String line : list) {
-                Film film = createFilmFromLine(line);
-                bulk.add(new IndexRequest("imdb").id(film.getId())
-                        .source(objectMapper.writeValueAsString(film), XContentType.JSON));
+                command.execute(new Object[]{line, bulk, objectMapper});
             }
 
             client.getClient().bulk(bulk, RequestOptions.DEFAULT);
@@ -101,21 +104,6 @@ public class ElasticClientUtil implements IElasticUtil {
 
         reader.close();
         return "Success loading data";
-    }
-
-    /**
-     * Helper method, creates a {@link Film} POJO from a line extracted from the data source.
-     *
-     * @param line String containing the info of the film separated by tabs.
-     * @return A Film POJO
-     */
-    private Film createFilmFromLine(String line) {
-        var data = line.split("\t");
-        return new Film(data[0], data[2],
-                data[8].equals("\\N") ? null : data[8].split(","),
-                data[1],
-                data[5].equals("\\N") ? null : data[5] + "-01-01",
-                data[6].equals("\\N") ? null : data[6] + "-01-01");
     }
 
     /**

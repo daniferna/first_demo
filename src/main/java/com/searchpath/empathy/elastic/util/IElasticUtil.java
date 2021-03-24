@@ -1,6 +1,7 @@
 package com.searchpath.empathy.elastic.util;
 
 import com.searchpath.empathy.elastic.ElasticClient;
+import com.searchpath.empathy.elastic.commands.Command;
 import com.searchpath.empathy.pojo.QueryResponse;
 
 import java.io.IOException;
@@ -18,12 +19,14 @@ public interface IElasticUtil {
     String getClusterName() throws IOException;
 
     /**
-     * This method reads the file containing the IMDB films and index them into elastic search.
-     * All reading and processing operations shall be lazy in order to save memory.
      *
+     * @param fileName The name of the file containing the data. It has to be located at the resources folder
+     * @param chunkSize The size you want to divide the read data from the file.
+     * @param command The command containing the logic for the creation of bulks for the specified type of media.
      * @return "Success loading data" if everything went well.
+     * @throws IOException If an error occur during the reading or indexing process.
      */
-    String loadIMDBData() throws IOException, ParseException;
+    String loadIMDBMedia(String fileName, int chunkSize, Command command) throws IOException;
 
     /**
      * Search films based on the query and transforms the result of the query into a QueryResponse object.

@@ -1,5 +1,8 @@
 package com.searchpath.empathy.controllers;
 
+import com.searchpath.empathy.elastic.commands.Command;
+import com.searchpath.empathy.elastic.commands.impl.FilmBulkCreationCommand;
+import com.searchpath.empathy.elastic.commands.impl.RatingBulkCreationCommand;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -21,13 +24,38 @@ public class IndexController extends BaseController {
 
     /**
      * Manages the petitions to /index
-     * Call which initiates the process of indexing of the IMDB data stored in the resources folder.
+     * Call which initiates the process of indexing of both the IMDB films and ratings stored in the resources folder.
      * @return A response with OK status and the returned String of the called method if everything works well.
-     * @see IElasticUtil#loadIMDBData()
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      * @throws IOException If something went wrong
      */
     @Get
-    public String index() throws IOException, ParseException {
-        return elasticUtil.loadIMDBData();
+    public String index() throws IOException {
+        elasticUtil.loadIMDBMedia("films.tsv", 10000, new FilmBulkCreationCommand());
+        return elasticUtil.loadIMDBMedia("ratings.tsv", 20000, new RatingBulkCreationCommand());
+    }
+
+    /**
+     * Manages the petitions to /index/films
+     * Call which initiates the process of indexing of the IMDB films stored in the resources folder.
+     * @return A response with OK status and the returned String of the called method if everything works well.
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
+     * @throws IOException If something went wrong
+     */
+    @Get("/films")
+    public String indexFilms() throws IOException {
+        return elasticUtil.loadIMDBMedia("films.tsv", 10000, new FilmBulkCreationCommand());
+    }
+
+    /**
+     * Manages the petitions to /index/ratings
+     * Call which initiates the process of indexing of the IMDB ratings stored in the resources folder.
+     * @return A response with OK status and the returned String of the called method if everything works well.
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
+     * @throws IOException If something went wrong
+     */
+    @Get("/ratings")
+    public String indexRatings() throws IOException {
+        return elasticUtil.loadIMDBMedia("ratings.tsv", 20000, new RatingBulkCreationCommand());
     }
 }
