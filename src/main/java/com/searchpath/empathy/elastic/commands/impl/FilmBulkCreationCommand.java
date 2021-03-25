@@ -16,11 +16,7 @@ public class FilmBulkCreationCommand implements Command {
     ObjectMapper objectMapper;
 
     @Override
-    public void execute(Object[] args) throws JsonProcessingException {
-        String line = (String) args[0];
-        BulkRequest bulk = (BulkRequest) args[1];
-        objectMapper = (ObjectMapper) args[2];
-
+    public void execute(String line, BulkRequest bulk, ObjectMapper objectMapper) throws JsonProcessingException {
         Film film = createFilmFromLine(line);
         String filmJson = objectMapper.writeValueAsString(film);
         bulk.add(new UpdateRequest("imdb", film.getId())

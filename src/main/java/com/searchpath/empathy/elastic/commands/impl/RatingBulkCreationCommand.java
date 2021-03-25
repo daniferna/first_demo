@@ -15,11 +15,7 @@ public class RatingBulkCreationCommand implements Command {
     ObjectMapper objectMapper;
 
     @Override
-    public void execute(Object[] args) throws IOException {
-        String line = (String) args[0];
-        BulkRequest bulk = (BulkRequest) args[1];
-        objectMapper = (ObjectMapper) args[2];
-
+    public void execute(String line, BulkRequest bulk, ObjectMapper objectMapper) throws IOException {
         Rating rating = createRatingFromLine(line);
         String ratingJson = objectMapper.writeValueAsString(rating);
         bulk.add(new UpdateRequest("imdb", rating.getId())

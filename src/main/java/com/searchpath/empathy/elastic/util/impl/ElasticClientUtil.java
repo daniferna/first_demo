@@ -95,7 +95,7 @@ public class ElasticClientUtil implements IElasticUtil {
             List<String> list = linesList.next();
 
             for (String line : list) {
-                command.execute(new Object[]{line, bulk, objectMapper});
+                command.execute(line, bulk, objectMapper);
             }
 
             client.getClient().bulk(bulk, RequestOptions.DEFAULT);
