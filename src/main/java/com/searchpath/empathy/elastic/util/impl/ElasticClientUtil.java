@@ -23,8 +23,15 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
+import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
+import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.GaussDecayFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
@@ -34,6 +41,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.naming.Context;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,13 +148,54 @@ public class ElasticClientUtil implements IElasticUtil {
     public QueryResponse search(String query) throws IOException {
         var request = new SearchRequest("imdb");
 
-        var queryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
-        queryBuilder.field("title", 3);
-        queryBuilder.field("type", 2);
-        queryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
-        request.source(getSearchSourceBuilder(queryBuilder));
+        var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
+        multiMatchQueryBuilder.field("title", 3);
+        multiMatchQueryBuilder.field("type", 2);
+        multiMatchQueryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
+
+        FunctionScoreQueryBuilder.FilterFunctionBuilder[] filterFunctions = getFilterFunctions();
+
+        FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders
+                .functionScoreQuery(multiMatchQueryBuilder, filterFunctions);
+        functionScoreQueryBuilder.boost(5);
+        functionScoreQueryBuilder.boostMode(CombineFunction.MULTIPLY);
+
+        request.source(getSearchSourceBuilder(functionScoreQueryBuilder));
 
         return getQueryResponse(request);
+    }
+
+    /**
+     * Helper method, build all the filter functions to improve the query search results.
+     *
+     * @return An array containing all the filter functions
+     */
+    private FunctionScoreQueryBuilder.FilterFunctionBuilder[] getFilterFunctions() {
+        return new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
+                // Start year gauss decay function
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
+                        .gaussDecayFunction("start_year", "now", "3650d", "0d", 0.7)),
+                // Boost movies results over other types
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                        new MatchQueryBuilder("type", "movie"),
+                        ScoreFunctionBuilders.weightFactorFunction(3.5f)),
+                // Boost tvSeries results over other types
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                        new MatchQueryBuilder("type", "tvSeries"),
+                        ScoreFunctionBuilders.weightFactorFunction(3f)),
+                // Boost shorts results over other types
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                        new MatchQueryBuilder("type", "short"),
+                        ScoreFunctionBuilders.weightFactorFunction(3f)),
+                // Boost the results with higher avg rating
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
+                        .fieldValueFactorFunction("average_rating").factor(1.1f)
+                        .modifier(FieldValueFactorFunction.Modifier.LOG).missing(1)),
+                // Boost the results with higher number of votes
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
+                        .fieldValueFactorFunction("num_votes").factor(1.5f)
+                        .modifier(FieldValueFactorFunction.Modifier.LOG).missing(1))
+        };
     }
 
     /**
