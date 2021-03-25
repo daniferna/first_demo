@@ -26,7 +26,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSimpleQueryTermAggregations() throws IOException {
-        String expectedAggregations = "[{\"genres\":[{\"short\":21071},{\"comedy\":19647},{\"drama\":16065},{\"documentary\":8669},{\"adult\":8398},{\"talk-show\":7703},{\"music\":7695},{\"animation\":5295},{\"reality-tv\":4687},{\"family\":4375}]},{\"types\":[{\"tvepisode\":46545},{\"short\":13943},{\"video\":9787},{\"movie\":7209},{\"tvseries\":2783},{\"tvmovie\":1488},{\"tvminiseries\":446},{\"tvspecial\":402},{\"videogame\":201},{\"tvshort\":127}]}]";
+        String expectedAggregations = "[{\"genres\": {\"short\":21071,\"comedy\":19647,\"drama\":16065,\"documentary\":8669,\"adult\":8398,\"talk-show\":7703,\"music\":7695,\"animation\":5295,\"reality-tv\":4687,\"family\":4375}},{\"types\": {\"tvepisode\":46545,\"short\":13943,\"video\":9787,\"movie\":7209,\"tvseries\":2783,\"tvmovie\":1488,\"tvminiseries\":446,\"tvspecial\":402,\"videogame\":201,\"tvshort\":127}}]";
 
         var response = elasticUtil.search("Call me by your name");
         assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
@@ -34,7 +34,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSearchWithParamsTermAggregations() throws IOException {
-        String expectedAggregations = "[{\"genres\":[{\"drama\":217646},{\"comedy\":115620},{\"documentary\":110763},{\"action\":51316},{\"romance\":45133},{\"thriller\":38846},{\"crime\":35524},{\"horror\":32355},{\"adventure\":28384},{\"short\":21110}]},{\"types\":[{\"movie\":569618},{\"tvepisode\":46545},{\"short\":13943},{\"video\":9787},{\"tvseries\":2783},{\"tvmovie\":1488},{\"tvminiseries\":446},{\"tvspecial\":402},{\"videogame\":201},{\"tvshort\":127}]}]";
+        String expectedAggregations = "[{\"genres\": {\"drama\":217646,\"comedy\":115620,\"documentary\":110763,\"action\":51316,\"romance\":45133,\"thriller\":38846,\"crime\":35524,\"horror\":32355,\"adventure\":28384,\"short\":21110}},{\"types\": {\"movie\":569618,\"tvepisode\":46545,\"short\":13943,\"video\":9787,\"tvseries\":2783,\"tvmovie\":1488,\"tvminiseries\":446,\"tvspecial\":402,\"videogame\":201,\"tvshort\":127}}]";
 
         var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
                 "drama,romance", "movie"});
@@ -43,7 +43,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSimpleQueryDecadesAggregations() throws IOException {
-        String expectedAggregations = "{\"decades\":[{\"1879-1889\":1},{\"1889-1899\":75},{\"1899-1909\":340},{\"1909-1919\":748},{\"1920-1930\":378},{\"1929-1939\":313},{\"1940-1950\":352},{\"1949-1959\":891},{\"1960-1970\":1619},{\"1970-1980\":1764},{\"1980-1990\":2592},{\"1990-2000\":4640},{\"2000-2010\":11817},{\"2010-2020\":47095},{\"2020-2030\":6983}]}";
+        String expectedAggregations = "{\"decades\": {\"1880-1889\":1,\"1890-1899\":75,\"1900-1909\":340,\"1910-1919\":811,\"1921-1930\":315,\"1930-1939\":341,\"1941-1950\":324,\"1950-1959\":999,\"1961-1970\":1686,\"1971-1980\":1739,\"1981-1990\":2767,\"1991-2000\":4970,\"2001-2010\":13737,\"2011-2020\":50503,\"2021-2030\":1000}}";
 
         var response = elasticUtil.search("Call me by your name");
         assertEquals(objectMapper.writeValueAsString(response.getDateHistogramAggregation()), expectedAggregations);
@@ -51,7 +51,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSearchWithParamsDecadesAggregations() throws IOException {
-        String expectedAggregations = "{\"decades\":[{\"1879-1889\":1},{\"1889-1899\":93},{\"1899-1909\":536},{\"1909-1919\":13722},{\"1920-1930\":21899},{\"1929-1939\":20318},{\"1940-1950\":14806},{\"1949-1959\":22584},{\"1960-1970\":31900},{\"1970-1980\":40578},{\"1980-1990\":44690},{\"1990-2000\":48226},{\"2000-2010\":83426},{\"2010-2020\":200358},{\"2020-2030\":29402}]}";
+        String expectedAggregations = "{\"decades\": {\"1880-1889\":1,\"1890-1899\":93,\"1900-1909\":536,\"1910-1919\":16417,\"1921-1930\":19204,\"1930-1939\":22092,\"1941-1950\":13032,\"1950-1959\":25320,\"1961-1970\":33333,\"1971-1980\":40542,\"1981-1990\":45596,\"1991-2000\":48776,\"2001-2010\":92338,\"2011-2020\":205900,\"2021-2030\":9359}}";
 
         var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
                 "drama,romance", "movie"});
