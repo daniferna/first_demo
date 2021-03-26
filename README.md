@@ -52,6 +52,8 @@ _title.ratings.tsv.gz_. This dataset includes information as:
 * Genre of media
 * Start date of emission
 * End date of emission
+* Average rating
+* Number of votes
 
 In order to index this information on elasticsearch we need to follow the next steps:
 
@@ -149,7 +151,7 @@ Right now, you can do the following types of queries:
 * This kind of search receive a piece of text and performs a general search trying to extract and match all the elements
   of the query with the info elasticsearch has saved.
 * Example:
-  > http:localhost:8080/search?query=Spiderman+movie
+  > http:localhost:8080/search?query=Avengers:+Endgame
 
 #### Search by fields
 
