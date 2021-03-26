@@ -153,7 +153,7 @@ public class ElasticClientUtil implements IElasticUtil {
         multiMatchQueryBuilder.field("type", 2);
         multiMatchQueryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
 
-        FunctionScoreQueryBuilder.FilterFunctionBuilder[] filterFunctions = getFilterFunctions();
+        FunctionScoreQueryBuilder.FilterFunctionBuilder[] filterFunctions = getFilterFunctions(query);
 
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders
                 .functionScoreQuery(multiMatchQueryBuilder, filterFunctions);
@@ -170,7 +170,7 @@ public class ElasticClientUtil implements IElasticUtil {
      *
      * @return An array containing all the filter functions
      */
-    private FunctionScoreQueryBuilder.FilterFunctionBuilder[] getFilterFunctions() {
+    private FunctionScoreQueryBuilder.FilterFunctionBuilder[] getFilterFunctions(String query) {
         return new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
                 // Start year gauss decay function
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
@@ -187,6 +187,10 @@ public class ElasticClientUtil implements IElasticUtil {
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "short"),
                         ScoreFunctionBuilders.weightFactorFunction(3f)),
+                // Boost exact matches of titles
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                        new MatchPhraseQueryBuilder("title", query),
+                        ScoreFunctionBuilders.weightFactorFunction(1.5f)),
                 // Boost the results with higher avg rating
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
                         .fieldValueFactorFunction("average_rating").factor(1.1f)
