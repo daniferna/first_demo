@@ -9,6 +9,17 @@ Make sure you have installed in your system the following items:
 
 * Java 11
 * Docker Desktop CE
+* Gradle 6.4.1
+
+I recommend using SDKMan for the installation, but is not mandatory.
+
+```bash
+curl -s "https://get.sdkman.io" | bash
+sdk list java
+#Choose the Java v11 you like the most, I use java 11.0.3.hs-adpt
+sdk install java <the one you choosed>
+sdk install gradle 6.4.1
+```
 
 ## First steps
 

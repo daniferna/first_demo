@@ -31,8 +31,8 @@ public class IndexController extends BaseController {
      */
     @Get
     public String index() throws IOException {
-        elasticUtil.loadIMDBMedia("films.tsv", 10000, new FilmBulkCreationCommand());
-        return elasticUtil.loadIMDBMedia("ratings.tsv", 20000, new RatingBulkCreationCommand());
+        elasticUtil.loadIMDBMedia("films.tsv", 5000, new FilmBulkCreationCommand());
+        return elasticUtil.loadIMDBMedia("ratings.tsv", 5000, new RatingBulkCreationCommand());
     }
 
     /**
@@ -44,7 +44,7 @@ public class IndexController extends BaseController {
      */
     @Get("/films")
     public String indexFilms() throws IOException {
-        return elasticUtil.loadIMDBMedia("films.tsv", 10000, new FilmBulkCreationCommand());
+        return elasticUtil.loadIMDBMedia("films.tsv", 5000, new FilmBulkCreationCommand());
     }
 
     /**
@@ -56,6 +56,6 @@ public class IndexController extends BaseController {
      */
     @Get("/ratings")
     public String indexRatings() throws IOException {
-        return elasticUtil.loadIMDBMedia("ratings.tsv", 20000, new RatingBulkCreationCommand());
+        return elasticUtil.loadIMDBMedia("ratings.tsv", 5000, new RatingBulkCreationCommand());
     }
 }
