@@ -80,6 +80,7 @@ Is also possible to index just one of those datasets, this can be done through t
 The indexed data fit for search has the following types and values:
 
 * Title: text
+  * Passed under *query* parameter
 * Type: text
     * Possible values:
         * movie
@@ -140,7 +141,7 @@ at the url:
 
 or
 
-> http:localhost:8080/search?*title=Spiderman+3&type=movie*
+> http:localhost:8080/search?*query=Spiderman+3&type=movie*
 
 ### Types of search
 
@@ -153,7 +154,7 @@ Right now, you can do the following types of queries:
 * Example:
   > http:localhost:8080/search?query=Avengers:+Endgame
 
-#### Search by fields
+#### Search by query + fields
 
 * This kind of search looks specifically for the fields passed by parameters. Gives better results than the general
   query if you know the values and type of the elements you're passing by parameters.
@@ -166,16 +167,16 @@ Right now, you can do the following types of queries:
     * date
         * one or more range of years separated by commas
 
-##### Examples of search by fields:
+##### Examples of search by query + fields:
 
 Films titled "Spiderman 3"
-> /search?title=Spiderman+3&type=movie
+> /search?query=Spiderman+3&type=movie
 
 Media titled "The great adventure" of genre drama and adventure
-> /search?title=The+great+adventure&genre=drama,adventure
+> /search?query=The+great+adventure&genre=drama,adventure
 
 Film titled "Call me by your name" of genre drama and romance released between 2010 and 2020
-> /search?title=Call+me+by+your+name&type=movie&genre=drama,romance&date=2010-2020
+> /search?query=Call+me+by+your+name&type=movie&genre=drama,romance&date=2010-2020
 
 Film of genre drama released between 2010 and 2013, and between 1980 and 1995
-> /search?genre=drama&date=2010-2013,1980-1995
+> /search?query=The+Schindler's+list&genre=drama&date=2010-2013,1980-1995
