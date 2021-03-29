@@ -5,6 +5,7 @@ import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.QueryValue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -22,25 +23,23 @@ public class SearchController extends BaseController{
     }
 
     /**
-     * Manage the petitions to "/search{...}"
+     * Manage the petitions to "/search?query=queryText&{...}"
      *
      * @param query,title The String the petition shall contain with the query info
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
      */
-    @Get("{?query}{?title,genre,type,date}")
-    public HttpResponse<QueryResponse> search(Optional<String> query, Optional<String> title,
-                                              Optional<String> genre, Optional<String> type,
-                                              Optional<String> date) throws IOException {
+    @Get
+    public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genre,
+                                @QueryValue("type") Optional<String> type,
+                                @QueryValue("date") Optional<String> date) throws IOException {
 
-        if (query.isPresent())
-            return HttpResponse.ok(elasticUtil.search(query.get()));
-        else if (title.isPresent() || genre.isPresent() || type.isPresent() || date.isPresent()){
-            var params = new String[] {title.orElse(""), genre.orElse(""),
+        if (genre.isPresent() || type.isPresent() || date.isPresent()){
+            var params = new String[] {query, genre.orElse(""),
                     type.orElse(""), date.orElse("")};
-            return HttpResponse.ok(elasticUtil.searchByParams(params));
+            return elasticUtil.searchByParams(params);
         }
 
-        return HttpResponse.badRequest();
+        return elasticUtil.search(query);
     }
 
 }

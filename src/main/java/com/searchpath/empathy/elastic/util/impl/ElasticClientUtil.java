@@ -11,26 +11,19 @@ import com.searchpath.empathy.elastic.commands.Command;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
-import com.searchpath.empathy.pojo.Rating;
 import com.searchpath.empathy.pojo.aggregations.Aggregation;
 import com.searchpath.empathy.pojo.aggregations.bucket.impl.DateHistogramBucket;
 import com.searchpath.empathy.pojo.aggregations.bucket.impl.TermBucket;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
-import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.GaussDecayFunctionBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -41,13 +34,11 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.naming.Context;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -148,6 +139,12 @@ public class ElasticClientUtil implements IElasticUtil {
     public QueryResponse search(String query) throws IOException {
         var request = new SearchRequest("imdb");
 
+        request.source(getSearchSourceBuilder(getSearchQueryBuilder(query)));
+
+        return getQueryResponse(request);
+    }
+
+    private FunctionScoreQueryBuilder getSearchQueryBuilder(String query) {
         var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
         multiMatchQueryBuilder.field("title", 3);
         multiMatchQueryBuilder.field("type", 2);
@@ -159,10 +156,7 @@ public class ElasticClientUtil implements IElasticUtil {
                 .functionScoreQuery(multiMatchQueryBuilder, filterFunctions);
         functionScoreQueryBuilder.boost(5);
         functionScoreQueryBuilder.boostMode(CombineFunction.MULTIPLY);
-
-        request.source(getSearchSourceBuilder(functionScoreQueryBuilder));
-
-        return getQueryResponse(request);
+        return functionScoreQueryBuilder;
     }
 
     /**
@@ -187,6 +181,10 @@ public class ElasticClientUtil implements IElasticUtil {
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "short"),
                         ScoreFunctionBuilders.weightFactorFunction(3f)),
+                // Reduce result of type tvEpisode
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                        new MatchQueryBuilder("type", "tvEpisode"),
+                        ScoreFunctionBuilders.weightFactorFunction(0.2f)),
                 // Boost exact matches of titles
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchPhraseQueryBuilder("title", query),
@@ -226,23 +224,22 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
-        MatchQueryBuilder matchTitleQueryBuilder, matchTypeQueryBuilder, matchGenreQueryBuilder;
+        MatchQueryBuilder matchTypeQueryBuilder, matchGenreQueryBuilder;
 
         //Make sure the array has the appropriate length
         params = Arrays.stream(Arrays.copyOf(params, 4))
                 .map(str -> str == null ? "" : str).toArray(String[]::new);
 
-        if (params[0].length() >= 1) {
-            matchTitleQueryBuilder = new MatchQueryBuilder("title", params[0]);
-            queryBuilder.should(matchTitleQueryBuilder);
-        }
+        var generalSearchQueryBuilder = getSearchQueryBuilder(params[0]);
+        queryBuilder.must(generalSearchQueryBuilder);
+
         if (params[1].length() >= 1) {
             matchGenreQueryBuilder = new MatchQueryBuilder("genres", params[1]);
-            queryBuilder.should(matchGenreQueryBuilder);
+            queryBuilder.must(matchGenreQueryBuilder);
         }
         if (params[2].length() >= 1) {
             matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);
-            queryBuilder.should(matchTypeQueryBuilder);
+            queryBuilder.must(matchTypeQueryBuilder);
         }
         if (params[3].length() >= 1 && params[3].matches("([0-9]{4}-[0-9]{4},*)+")) {
             BoolQueryBuilder boolQueryBuilder = buildDateQuery(params[3]);
