@@ -1,3 +1,6 @@
 micronaut:
+  server:
+    cors:
+      enabled: true
   application:
     name: first_demo
