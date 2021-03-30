@@ -8,6 +8,7 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public class SearchControllerTest {
 
     @Test
     public void testSearchByTitle() throws IOException {
-        HttpRequest<String> request = HttpRequest.GET("/search?title=Avengers");
+        HttpRequest<String> request = HttpRequest.GET("/search?query=Avengers");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -56,7 +57,7 @@ public class SearchControllerTest {
 
     @Test
     public void testSearchByTitleAndType() throws IOException {
-        HttpRequest<String> request = HttpRequest.GET("/search?title=Avengers&type=documentary");
+        HttpRequest<String> request = HttpRequest.GET("/search?query=Avengers&type=documentary");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -66,7 +67,7 @@ public class SearchControllerTest {
 
     @Test
     public void testSearchByTypeAndGenre() throws IOException {
-        HttpRequest<String> request = HttpRequest.GET("/search?type=documentary&genre=Drama");
+        HttpRequest<String> request = HttpRequest.GET("/search?query=&type=documentary&genre=Drama");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -77,7 +78,7 @@ public class SearchControllerTest {
     @Test
     public void testSearchByTitleGenreAndType() throws IOException {
         HttpRequest<String> request = HttpRequest.GET(
-                "/search?title=The+Simpsons&type=tvSeries&genre=animation,comedy");
+                "/search?query=The+Simpsons&type=tvSeries&genre=animation,comedy");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -89,7 +90,7 @@ public class SearchControllerTest {
     @Test
     public void testSearchByTitleGenreTypeAndDate() throws IOException {
         HttpRequest<String> request = HttpRequest.GET(
-                "/search?title=The+Simpsons&type=tvSeries&genre=animation,comedy&date=2000-2015");
+                "/search?query=The+Simpsons&type=tvSeries&genre=animation,comedy&date=2000-2015");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -101,12 +102,12 @@ public class SearchControllerTest {
     @Test
     public void testSearchByMultipleDate() throws IOException {
         HttpRequest<String> request = HttpRequest.GET(
-                "/search?title=The+Simpsons&type=tvSeries&date=2000-2015,1990-1998");
+                "/search?query=The+Simpsons&type=tvSeries&date=2000-2015,1990-1998");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchByParams(
-                new String[]{"The Simpsons", "animation,comedy", "tvSeries", "2000-2015,1990-1998"});
+                new String[]{"The Simpsons", "", "tvSeries", "2000-2015,1990-1998"});
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 

@@ -29,12 +29,12 @@ public class SearchController extends BaseController{
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
      */
     @Get
-    public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genre,
+    public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genres,
                                 @QueryValue("type") Optional<String> type,
                                 @QueryValue("date") Optional<String> date) throws IOException {
 
-        if (genre.isPresent() || type.isPresent() || date.isPresent()){
-            var params = new String[] {query, genre.orElse(""),
+        if (genres.isPresent() || type.isPresent() || date.isPresent()){
+            var params = new String[] {query, genres.orElse(""),
                     type.orElse(""), date.orElse("")};
             return elasticUtil.searchByParams(params);
         }

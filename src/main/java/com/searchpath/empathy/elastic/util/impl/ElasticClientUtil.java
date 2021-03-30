@@ -179,15 +179,15 @@ public class ElasticClientUtil implements IElasticUtil {
                 // Boost movies results over other types
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "movie"),
-                        ScoreFunctionBuilders.weightFactorFunction(3.5f)),
+                        ScoreFunctionBuilders.weightFactorFunction(1.8f)),
                 // Boost tvSeries results over other types
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "tvSeries"),
-                        ScoreFunctionBuilders.weightFactorFunction(3f)),
+                        ScoreFunctionBuilders.weightFactorFunction(1.3f)),
                 // Boost shorts results over other types
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "short"),
-                        ScoreFunctionBuilders.weightFactorFunction(3f)),
+                        ScoreFunctionBuilders.weightFactorFunction(1.2f)),
                 // Reduce result of type tvEpisode
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "tvEpisode"),
@@ -231,7 +231,7 @@ public class ElasticClientUtil implements IElasticUtil {
     }
 
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
-        MatchQueryBuilder matchTypeQueryBuilder, matchGenreQueryBuilder;
+        MatchQueryBuilder matchTypeQueryBuilder;
 
         //Make sure the array has the appropriate length
         params = Arrays.stream(Arrays.copyOf(params, 4))
@@ -241,8 +241,9 @@ public class ElasticClientUtil implements IElasticUtil {
         queryBuilder.must(generalSearchQueryBuilder);
 
         if (params[1].length() >= 1) {
-            matchGenreQueryBuilder = new MatchQueryBuilder("genres", params[1]);
-            queryBuilder.filter(matchGenreQueryBuilder);
+            for (var genre : params[1].split(",")) {
+                queryBuilder.filter(new TermQueryBuilder("genres", genre));
+            }
         }
         if (params[2].length() >= 1) {
             matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);

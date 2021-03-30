@@ -34,7 +34,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSearchWithParamsTermAggregations() throws IOException {
-        String expectedAggregations = "[{\"genres\": {\"drama\":217646,\"comedy\":115620,\"documentary\":110763,\"action\":51316,\"romance\":45133,\"thriller\":38846,\"crime\":35524,\"horror\":32355,\"adventure\":28384,\"short\":21110}},{\"types\": {\"movie\":569618,\"tvepisode\":46545,\"short\":13943,\"video\":9787,\"tvseries\":2783,\"tvmovie\":1488,\"tvminiseries\":446,\"tvspecial\":402,\"videogame\":201,\"tvshort\":127}}]";
+        String expectedAggregations = "[{\"genres\": {\"drama\":378,\"romance\":378,\"comedy\":106,\"crime\":15,\"action\":10,\"thriller\":9,\"fantasy\":7,\"music\":7,\"mystery\":7,\"family\":6}},{\"types\": {\"movie\":378}}]";
 
         var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
                 "drama,romance", "movie"});
@@ -51,7 +51,7 @@ public class SearchAggregationsTest {
 
     @Test
     public void testSearchWithParamsDecadesAggregations() throws IOException {
-        String expectedAggregations = "{\"decades\": {\"1880-1889\":1,\"1890-1899\":93,\"1900-1909\":536,\"1910-1919\":16417,\"1921-1930\":19204,\"1930-1939\":22092,\"1941-1950\":13032,\"1950-1959\":25320,\"1961-1970\":33333,\"1971-1980\":40542,\"1981-1990\":45596,\"1991-2000\":48776,\"2001-2010\":92338,\"2011-2020\":205900,\"2021-2030\":9359}}";
+        String expectedAggregations = "{\"decades\": {\"1921-1930\":5,\"1930-1939\":16,\"1941-1950\":6,\"1950-1959\":14,\"1961-1970\":24,\"1971-1980\":18,\"1981-1990\":21,\"1991-2000\":39,\"2001-2010\":81,\"2011-2020\":125,\"2021-2030\":5}}";
 
         var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
                 "drama,romance", "movie"});

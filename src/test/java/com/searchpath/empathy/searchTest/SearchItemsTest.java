@@ -59,7 +59,7 @@ public class SearchItemsTest {
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi"});
+                new String[]{"Spiderman 3", "Action,adventure,Sci-Fi"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -69,7 +69,7 @@ public class SearchItemsTest {
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                new String[]{"Spiderman 3", "Action, adventure, Sci-Fi", "movie"});
+                new String[]{"Spiderman 3", "Action,adventure,Sci-Fi", "movie"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -96,7 +96,7 @@ public class SearchItemsTest {
         var expectedFilm = new Film("tt5726616", "Call Me by Your Name", new String[]{"Drama", "Romance"}
                 , "movie", "2017-01-01", null);
 
-        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "Drama, romance"});
+        var response = elasticUtil.searchByParams(new String[]{"Call me by your name", "Drama,romance"});
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
