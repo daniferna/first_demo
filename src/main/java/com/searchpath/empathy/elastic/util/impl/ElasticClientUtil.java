@@ -144,6 +144,12 @@ public class ElasticClientUtil implements IElasticUtil {
         return getQueryResponse(request);
     }
 
+    /**
+     * Helper method, it builds the main search query, the general one.
+     *
+     * @param query Text containing the information we are looking for.
+     * @return The {@link FunctionScoreQueryBuilder} ready to be passed to the request.
+     */
     private FunctionScoreQueryBuilder getSearchQueryBuilder(String query) {
         var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
         multiMatchQueryBuilder.field("title", 3);
@@ -156,6 +162,7 @@ public class ElasticClientUtil implements IElasticUtil {
                 .functionScoreQuery(multiMatchQueryBuilder, filterFunctions);
         functionScoreQueryBuilder.boost(5);
         functionScoreQueryBuilder.boostMode(CombineFunction.MULTIPLY);
+
         return functionScoreQueryBuilder;
     }
 
@@ -188,7 +195,7 @@ public class ElasticClientUtil implements IElasticUtil {
                 // Boost exact matches of titles
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchPhraseQueryBuilder("title", query),
-                        ScoreFunctionBuilders.weightFactorFunction(1.5f)),
+                        ScoreFunctionBuilders.weightFactorFunction(1.2f)),
                 // Boost the results with higher avg rating
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
                         .fieldValueFactorFunction("average_rating").factor(1.1f)
@@ -235,15 +242,15 @@ public class ElasticClientUtil implements IElasticUtil {
 
         if (params[1].length() >= 1) {
             matchGenreQueryBuilder = new MatchQueryBuilder("genres", params[1]);
-            queryBuilder.must(matchGenreQueryBuilder);
+            queryBuilder.filter(matchGenreQueryBuilder);
         }
         if (params[2].length() >= 1) {
             matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);
-            queryBuilder.must(matchTypeQueryBuilder);
+            queryBuilder.filter(matchTypeQueryBuilder);
         }
         if (params[3].length() >= 1 && params[3].matches("([0-9]{4}-[0-9]{4},*)+")) {
             BoolQueryBuilder boolQueryBuilder = buildDateQuery(params[3]);
-            queryBuilder.must(boolQueryBuilder);
+            queryBuilder.filter(boolQueryBuilder);
         }
 
     }
