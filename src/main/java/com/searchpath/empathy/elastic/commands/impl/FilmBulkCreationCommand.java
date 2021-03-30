@@ -8,12 +8,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 public class FilmBulkCreationCommand implements Command {
-
-    ObjectMapper objectMapper;
 
     @Override
     public void execute(String line, BulkRequest bulk, ObjectMapper objectMapper) throws JsonProcessingException {
@@ -32,7 +27,7 @@ public class FilmBulkCreationCommand implements Command {
      */
     private Film createFilmFromLine(String line) {
         var data = line.split("\t");
-        return new Film(data[0], data[2],
+        return new Film(data[0], data[2], data[3],
                 data[8].equals("\\N") ? null : data[8].split(","),
                 data[1],
                 data[5].equals("\\N") ? null : data[5] + "-01-01",
