@@ -196,8 +196,7 @@ public class ElasticClientUtil implements IElasticUtil {
                         ScoreFunctionBuilders.weightFactorFunction(0.2f)),
                 // Boost exact matches of titles or original titles
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
-                        new DisMaxQueryBuilder()
-                                .add(new MatchPhraseQueryBuilder("title", query))
+                        new DisMaxQueryBuilder().add(new MatchPhraseQueryBuilder("title", query))
                                 .add(new MatchPhraseQueryBuilder("original_title", query))
                                 .tieBreaker(0.2f),
                         ScoreFunctionBuilders.weightFactorFunction(1.2f)),

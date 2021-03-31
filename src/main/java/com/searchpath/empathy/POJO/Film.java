@@ -19,6 +19,7 @@ public class Film {
     private final String type;
     private final String start_year;
     private final String end_year;
+    private String original_title;
     @JsonProperty("average_rating")
     private float average_rating;
     @JsonProperty("num_votes")
@@ -27,10 +28,16 @@ public class Film {
     @JsonCreator()
     public Film(@JsonProperty("id") String id,
                 @JsonProperty("title") String title,
+                @JsonProperty("original_title") String originalTitle,
                 @JsonProperty("genres") String[] genres,
                 @JsonProperty("type") String type,
                 @JsonProperty("start_year") String start_year,
                 @JsonProperty("end_year") String end_year) {
+        this(id,title,genres,type,start_year,end_year);
+        this.original_title = originalTitle;
+    }
+
+    public Film(String id, String title, String[] genres, String type, String start_year, String end_year) {
         this.id = id;
         this.title = title;
         this.genres = genres;
@@ -45,6 +52,10 @@ public class Film {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getOriginal_title() {
+        return original_title;
     }
 
     public String[] getGenres() {
