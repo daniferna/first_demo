@@ -199,11 +199,11 @@ public class ElasticClientUtil implements IElasticUtil {
                 // Boost the results with higher avg rating
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
                         .fieldValueFactorFunction("average_rating").factor(1.1f)
-                        .modifier(FieldValueFactorFunction.Modifier.LOG).missing(1)),
+                        .modifier(FieldValueFactorFunction.Modifier.LOG1P).missing(1)),
                 // Boost the results with higher number of votes
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
                         .fieldValueFactorFunction("num_votes").factor(1.5f)
-                        .modifier(FieldValueFactorFunction.Modifier.LOG).missing(1))
+                        .modifier(FieldValueFactorFunction.Modifier.LOG1P).missing(1))
         };
     }
 
