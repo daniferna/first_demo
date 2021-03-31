@@ -151,8 +151,10 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The {@link FunctionScoreQueryBuilder} ready to be passed to the request.
      */
     private FunctionScoreQueryBuilder getSearchQueryBuilder(String query) {
-        var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "genres", "type", "start_year.getYear");
+        var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "original_title",
+                "genres", "type", "start_year.getYear");
         multiMatchQueryBuilder.field("title", 3);
+        multiMatchQueryBuilder.field("original_title", 3);
         multiMatchQueryBuilder.field("type", 2);
         multiMatchQueryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
 
@@ -192,9 +194,11 @@ public class ElasticClientUtil implements IElasticUtil {
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                         new MatchQueryBuilder("type", "tvEpisode"),
                         ScoreFunctionBuilders.weightFactorFunction(0.2f)),
-                // Boost exact matches of titles
+                // Boost exact matches of titles or original titles
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(
-                        new MatchPhraseQueryBuilder("title", query),
+                        new DisMaxQueryBuilder().add(new MatchPhraseQueryBuilder("title", query))
+                                .add(new MatchPhraseQueryBuilder("original_title", query))
+                                .tieBreaker(0.2f),
                         ScoreFunctionBuilders.weightFactorFunction(1.2f)),
                 // Boost the results with higher avg rating
                 new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders
