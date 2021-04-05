@@ -55,7 +55,7 @@ petitions to elasticsearch.
 
 ### Indexing the IMDB data
 
-We use the IMDB data available at https://datasets.imdbws.com, more specifically the *title.basics.tsv.gz* and 
+We use the IMDB data available at https://datasets.imdbws.com, more specifically the *title.basics.tsv.gz* and
 _title.ratings.tsv.gz_. This dataset includes information as:
 
 * Title of the media
@@ -82,16 +82,28 @@ Or, as an alternative, open a web browser and go to the following url:
 Once the index process is finished you will see a "success" message appear in the bash or the browser. It can take a
 while, so be patient. It normally takes less than 10 minutes, but it depends on the computer.
 
-Is also possible to index just one of those datasets, this can be done through the API calls:
+#### Other indexing methods
+
+It is also possible to index just one of those datasets, this can be done through the following API endpoints:
+
 * /index/films
 * /index/ratings
+
+There is another endpoint which performs the indexing in the background, without having the terminal or the web browser
+on hold. Once finished, it will print a notification on the terminal running Micronaut.
+
+This endpoint is **/index/background**. Example of use:
+
+```bash
+curl -XGET "localhost:8080/index/background"
+```
 
 ## Types of fields
 
 The indexed data fit for search has the following types and values:
 
 * Title: text
-  * Passed under *query* parameter
+    * Passed under *query* parameter
 * Type: text
     * Possible values:
         * movie
