@@ -2,7 +2,6 @@ package com.searchpath.empathy.controllers;
 
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import com.searchpath.empathy.pojo.QueryResponse;
-import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
@@ -28,6 +27,7 @@ public class SearchController extends BaseController{
      * @param query,title The String the petition shall contain with the query info
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Get
     public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genres,
                                 @QueryValue("type") Optional<String> type,

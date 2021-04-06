@@ -6,12 +6,10 @@ import com.searchpath.empathy.elastic.commands.impl.RatingBulkCreationCommand;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
-import org.elasticsearch.threadpool.ThreadPool;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Controller("/index")
 public class IndexController extends BaseController {

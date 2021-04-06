@@ -151,12 +151,8 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The {@link FunctionScoreQueryBuilder} ready to be passed to the request.
      */
     private FunctionScoreQueryBuilder getSearchQueryBuilder(String query) {
-        var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "original_title",
-                "genres", "type", "start_year.getYear");
-        multiMatchQueryBuilder.field("title", 3);
-        multiMatchQueryBuilder.field("original_title", 3);
-        multiMatchQueryBuilder.field("type", 2);
-        multiMatchQueryBuilder.type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
+        var multiMatchQueryBuilder = new MultiMatchQueryBuilder(query, "title", "original_title");
+        multiMatchQueryBuilder.type(MultiMatchQueryBuilder.Type.BEST_FIELDS);
 
         FunctionScoreQueryBuilder.FilterFunctionBuilder[] filterFunctions = getFilterFunctions(query);
 
@@ -306,8 +302,8 @@ public class ElasticClientUtil implements IElasticUtil {
      * @param sourceBuilder The sourceBuilder to be modified
      */
     private void addAggregations(SearchSourceBuilder sourceBuilder) {
-        var aggTermsGenresBuilder = AggregationBuilders.terms("genres");
-        var aggTypeTermsBuilder = AggregationBuilders.terms("types");
+        var aggTermsGenresBuilder = AggregationBuilders.terms("genres").size(28);
+        var aggTypeTermsBuilder = AggregationBuilders.terms("types").size(13);
         var aggDateHistogramBuilder = AggregationBuilders.dateHistogram("decades");
 
         aggTermsGenresBuilder.field("genres");
