@@ -7,7 +7,7 @@ at Empathy.co
 
 Make sure you have installed in your system the following items:
 
-* Java 11
+* Java 15
 * Docker Desktop CE
 * Gradle 6.4.1
 

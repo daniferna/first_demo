@@ -8,11 +8,12 @@ import io.micronaut.http.annotation.QueryValue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Optional;
 
 @Controller("/search")
-public class SearchController extends BaseController{
+public class SearchController extends BaseController {
 
     private final IElasticUtil elasticUtil;
 
@@ -31,15 +32,13 @@ public class SearchController extends BaseController{
     @Get
     public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genres,
                                 @QueryValue("type") Optional<String> type,
-                                @QueryValue("date") Optional<String> date) throws IOException {
+                                @QueryValue("date") Optional<String> date,
+                                @QueryValue("filter*") Optional<String> filter) throws IOException {
 
-        if (genres.isPresent() || type.isPresent() || date.isPresent()){
-            var params = new String[] {query, genres.orElse(""),
-                    type.orElse(""), date.orElse("")};
-            return elasticUtil.searchByParams(params);
-        }
+        var params = new String[]{query, genres.orElse(""),
+                type.orElse(""), date.orElse(""), filter.orElse("")};
+        return elasticUtil.searchByParams(params);
 
-        return elasticUtil.search(query);
     }
 
 }

@@ -222,20 +222,20 @@ public class ElasticClientUtil implements IElasticUtil {
     public QueryResponse searchByParams(String[] params) throws IOException {
         var request = new SearchRequest("imdb");
 
+        //Make sure the array has the appropriate length
+        params = Arrays.stream(Arrays.copyOf(params, 5))
+                .map(str -> str == null ? "" : str).toArray(String[]::new);
+
         BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
         buildBoolQuery(params, queryBuilder);
 
-        request.source(getSearchSourceBuilder(queryBuilder));
+        request.source(getSearchSourceBuilder(queryBuilder, params[4].split(",")));
 
         return getQueryResponse(request);
     }
 
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
         MatchQueryBuilder matchTypeQueryBuilder;
-
-        //Make sure the array has the appropriate length
-        params = Arrays.stream(Arrays.copyOf(params, 4))
-                .map(str -> str == null ? "" : str).toArray(String[]::new);
 
         var generalSearchQueryBuilder = getSearchQueryBuilder(params[0]);
         queryBuilder.must(generalSearchQueryBuilder);
@@ -285,15 +285,47 @@ public class ElasticClientUtil implements IElasticUtil {
      * configure it.
      *
      * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @param filters      The filters you want to apply as post filters.
      * @return The SearchSourceBuilder properly configured.
      */
-    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters) {
         var sourceBuilder = new SearchSourceBuilder();
 
         sourceBuilder.size(10);
         addAggregations(sourceBuilder);
+        addPostFilters(filters, sourceBuilder);
 
         return sourceBuilder.query(queryBuilder);
+    }
+
+    /**
+     * Implementation of default parameter method using method overloading.
+     *
+     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @return The SearchSourceBuilder properly configured.
+     */
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
+        return this.getSearchSourceBuilder(queryBuilder, new String[]{});
+    }
+
+    /**
+     * Helper method which adds post filters to the sourceBuilder
+     * @param filters Filters to be added
+     * @param sourceBuilder The source builder to be modified
+     */
+    private void addPostFilters(String[] filters, SearchSourceBuilder sourceBuilder) {
+        for (var filterStr : filters) {
+            var filter = filterStr.split(":");
+            switch (filter[0]) {
+                case "genres", "type" -> sourceBuilder.postFilter(QueryBuilders.termQuery(filter[0], filter[1]));
+                case "date" -> {
+                    var dateRange = filter[1].split("-");
+                    sourceBuilder.postFilter(QueryBuilders.
+                            rangeQuery("start_year").format("yyyy")
+                            .gte(dateRange[0]).lte(dateRange[1]));
+                }
+            }
+        }
     }
 
     /**
