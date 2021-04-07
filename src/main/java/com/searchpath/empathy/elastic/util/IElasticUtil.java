@@ -2,6 +2,7 @@ package com.searchpath.empathy.elastic.util;
 
 import com.searchpath.empathy.elastic.ElasticClient;
 import com.searchpath.empathy.elastic.commands.Command;
+import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
 
 import java.io.IOException;
@@ -45,4 +46,13 @@ public interface IElasticUtil {
      * @throws IOException In case there is an error accessing elastic search.
      */
     QueryResponse searchByParams(String[] params) throws IOException;
+
+    /**
+     * Search titles by their id
+     * @param id The id of the title you're looking for
+     * @return  A {@link com.searchpath.empathy.pojo.Film} containing just that title
+     * @throws IOException In case there is an error accessing elastic search.
+     */
+    Film searchByTitleID(String id) throws IOException;
+
 }

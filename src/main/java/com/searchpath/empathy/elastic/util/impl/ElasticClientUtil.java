@@ -29,6 +29,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
@@ -40,6 +41,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Class containing helper methods to interact with the Elastic Client.
@@ -88,7 +90,8 @@ public class ElasticClientUtil implements IElasticUtil {
         var bulk = new BulkRequest();
 
         // Split the data stream in chunks in a lazy way.
-        UnmodifiableIterator<List<String>> linesList = Iterators.partition(reader.lines().skip(1).iterator(), chunkSize);
+        UnmodifiableIterator<List<String>> linesList =
+                Iterators.partition(reader.lines().skip(1).iterator(), chunkSize);
 
         while (linesList.hasNext()) {
             List<String> list = linesList.next();
@@ -234,6 +237,37 @@ public class ElasticClientUtil implements IElasticUtil {
         return getQueryResponse(request);
     }
 
+    /**
+     * This implementation use the {@link ElasticClient} API to look for the title
+     * specified by the id passed by params.
+     * It creates a {@link SearchRequest}, and using a {@link QueryBuilders#matchPhraseQuery(String, Object),
+     * passing as params the name of the field and the id received by params.
+     * <p>
+     * Once the response is obtained, is processed by a private helper method {@link #parseHitToFilms(SearchHits)}
+     * which transform the hits, just one in this case, into {@link Film} object, which is then returned.
+     *
+     * @throws IOException If the method can't serialize the hit into a Film JSON or an error occur while searching
+     *                     the query through the client.
+     */
+    @Override
+    public Film searchByTitleID(String id) throws IOException {
+        var request = new SearchRequest("imdb");
+
+        var query = QueryBuilders.matchPhraseQuery("id", id);
+
+        request.source(getSearchSourceBuilder(query, false));
+
+        var response = client.getClient().search(request, RequestOptions.DEFAULT);
+
+        return parseHitToFilms(response.getHits())[0];
+    }
+
+    /**
+     * Helper method, it builds a {@link org.apache.lucene.search.BooleanQuery} containing all the filters needed, having into account the
+     * params received as parameters.
+     * @param params A String array containing all the fields that will be used in the bool query as filters
+     * @param queryBuilder  The builder containing all the information needed to build the Boolean Query.
+     */
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
         MatchQueryBuilder matchTypeQueryBuilder;
 
@@ -286,13 +320,16 @@ public class ElasticClientUtil implements IElasticUtil {
      *
      * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
      * @param filters      The filters you want to apply as post filters.
+     * @param needAggregations A boolean value defining if there is a need for aggregations or not.
      * @return The SearchSourceBuilder properly configured.
      */
-    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters) {
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters
+            , boolean needAggregations) {
         var sourceBuilder = new SearchSourceBuilder();
 
         sourceBuilder.size(10);
-        addAggregations(sourceBuilder);
+        if (needAggregations)
+            addAggregations(sourceBuilder);
         addPostFilters(filters, sourceBuilder);
 
         return sourceBuilder.query(queryBuilder);
@@ -305,7 +342,29 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
-        return this.getSearchSourceBuilder(queryBuilder, new String[]{});
+        return this.getSearchSourceBuilder(queryBuilder, new String[]{}, true);
+    }
+
+    /**
+     * Implementation of default parameter method using method overloading.
+     *
+     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @param filters      The filters you want to apply as post filters.
+     * @return The SearchSourceBuilder properly configured.
+     */
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters) {
+        return this.getSearchSourceBuilder(queryBuilder, filters, true);
+    }
+
+    /**
+     * Implementation of default parameter method using method overloading.
+     *
+     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @param needAggregations A boolean value defining if there is a need for aggregations or not.
+     * @return The SearchSourceBuilder properly configured.
+     */
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, boolean needAggregations) {
+        return this.getSearchSourceBuilder(queryBuilder, new String[]{}, needAggregations);
     }
 
     /**
@@ -334,19 +393,20 @@ public class ElasticClientUtil implements IElasticUtil {
      * @param sourceBuilder The sourceBuilder to be modified
      */
     private void addAggregations(SearchSourceBuilder sourceBuilder) {
-        var aggTermsGenresBuilder = AggregationBuilders.terms("genres").size(28);
-        var aggTypeTermsBuilder = AggregationBuilders.terms("types").size(13);
+        var aggTermsGenresBuilder = AggregationBuilders.terms("genres");
+        var aggTypeTermsBuilder = AggregationBuilders.terms("types");
         var aggDateHistogramBuilder = AggregationBuilders.dateHistogram("decades");
 
-        aggTermsGenresBuilder.field("genres");
-        aggTypeTermsBuilder.field("type");
-
-        aggDateHistogramBuilder.field("start_year");
-        //Use of seconds in order to minimize the problem generated by leap-years
-        aggDateHistogramBuilder.fixedInterval(new DateHistogramInterval("315581500s"));
-        aggDateHistogramBuilder.format("yyyy");
-        aggDateHistogramBuilder.minDocCount(0);
-        aggDateHistogramBuilder.offset("2h");
+        aggTermsGenresBuilder.field("genres")
+                .size(28);
+        aggTypeTermsBuilder.field("type")
+                .size(13);
+        
+        aggDateHistogramBuilder.field("start_year")
+                //Use of seconds in order to minimize the problem generated by leap-years
+                .fixedInterval(new DateHistogramInterval("315581500s"))
+                .format("yyyy")
+                .offset("2h");
 
         sourceBuilder.aggregation(aggTermsGenresBuilder).aggregation(aggTypeTermsBuilder)
                 .aggregation(aggDateHistogramBuilder);

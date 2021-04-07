@@ -1,14 +1,15 @@
 package com.searchpath.empathy.controllers;
 
 import com.searchpath.empathy.elastic.util.IElasticUtil;
+import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.QueryValue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -27,6 +28,7 @@ public class SearchController extends BaseController {
      *
      * @param query,title The String the petition shall contain with the query info
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
+     * @throws IOException  If there's a problem when accessing ElasticSearch
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Get
@@ -39,6 +41,17 @@ public class SearchController extends BaseController {
                 type.orElse(""), date.orElse(""), filter.orElse("")};
         return elasticUtil.searchByParams(params);
 
+    }
+
+    /**
+     * Manage the petitions to "/search/titles/:titleID"
+     * @param titleID The ID of the title you're looking for
+     * @return The title you were looking for
+     * @throws IOException  If there's a problem when accessing ElasticSearch
+     */
+    @Get("/titles/{titleID}")
+    public Film searchByTitleID(@PathVariable String titleID) throws IOException {
+        return elasticUtil.searchByTitleID(titleID);
     }
 
 }
