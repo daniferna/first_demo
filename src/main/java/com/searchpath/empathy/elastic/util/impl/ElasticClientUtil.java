@@ -231,7 +231,8 @@ public class ElasticClientUtil implements IElasticUtil {
         BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
         buildBoolQuery(params, queryBuilder);
 
-        request.source(getSearchSourceBuilder(queryBuilder, params[4].split(",")));
+        var commasOutsideBrackets = ",(?![^\\[]*])";
+        request.source(getSearchSourceBuilder(queryBuilder, params[4].split(commasOutsideBrackets)));
 
         return getQueryResponse(request);
     }
