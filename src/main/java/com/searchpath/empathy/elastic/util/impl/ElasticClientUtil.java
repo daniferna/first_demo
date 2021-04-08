@@ -27,9 +27,9 @@ import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
@@ -41,7 +41,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Class containing helper methods to interact with the Elastic Client.
@@ -265,8 +264,9 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * Helper method, it builds a {@link org.apache.lucene.search.BooleanQuery} containing all the filters needed, having into account the
      * params received as parameters.
-     * @param params A String array containing all the fields that will be used in the bool query as filters
-     * @param queryBuilder  The builder containing all the information needed to build the Boolean Query.
+     *
+     * @param params       A String array containing all the fields that will be used in the bool query as filters
+     * @param queryBuilder The builder containing all the information needed to build the Boolean Query.
      */
     private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
         MatchQueryBuilder matchTypeQueryBuilder;
@@ -318,8 +318,8 @@ public class ElasticClientUtil implements IElasticUtil {
      * Helper method, builds a {@link SearchSourceBuilder} from a {@link QueryBuilder} passed by params and then
      * configure it.
      *
-     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
-     * @param filters      The filters you want to apply as post filters.
+     * @param queryBuilder     The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @param filters          The filters you want to apply as post filters.
      * @param needAggregations A boolean value defining if there is a need for aggregations or not.
      * @return The SearchSourceBuilder properly configured.
      */
@@ -329,7 +329,7 @@ public class ElasticClientUtil implements IElasticUtil {
 
         sourceBuilder.size(10);
         if (needAggregations)
-            addAggregations(sourceBuilder);
+            addAggregations(sourceBuilder, filters);
         addPostFilters(filters, sourceBuilder);
 
         return sourceBuilder.query(queryBuilder);
@@ -359,7 +359,7 @@ public class ElasticClientUtil implements IElasticUtil {
     /**
      * Implementation of default parameter method using method overloading.
      *
-     * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
+     * @param queryBuilder     The QueryBuilder we want to transform into a SearchSourceBuilder.
      * @param needAggregations A boolean value defining if there is a need for aggregations or not.
      * @return The SearchSourceBuilder properly configured.
      */
@@ -369,22 +369,25 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * Helper method which adds post filters to the sourceBuilder
-     * @param filters Filters to be added
+     *
+     * @param filters       Filters to be added
      * @param sourceBuilder The source builder to be modified
      */
     private void addPostFilters(String[] filters, SearchSourceBuilder sourceBuilder) {
+        var boolQuery = QueryBuilders.boolQuery();
         for (var filterStr : filters) {
             var filter = filterStr.split(":");
             switch (filter[0]) {
-                case "genres", "type" -> sourceBuilder.postFilter(QueryBuilders.termQuery(filter[0], filter[1]));
+                case "genres", "type" -> boolQuery.filter().add(QueryBuilders.termQuery(filter[0], filter[1]));
                 case "date" -> {
                     var dateRange = filter[1].split("-");
-                    sourceBuilder.postFilter(QueryBuilders.
+                    boolQuery.filter().add(QueryBuilders.
                             rangeQuery("start_year").format("yyyy")
                             .gte(dateRange[0]).lte(dateRange[1]));
                 }
             }
         }
+        sourceBuilder.postFilter(boolQuery);
     }
 
     /**
@@ -392,24 +395,85 @@ public class ElasticClientUtil implements IElasticUtil {
      *
      * @param sourceBuilder The sourceBuilder to be modified
      */
-    private void addAggregations(SearchSourceBuilder sourceBuilder) {
+    private void addAggregations(SearchSourceBuilder sourceBuilder, String[] filters) {
+        //Declaration of subAggregations
         var aggTermsGenresBuilder = AggregationBuilders.terms("genres");
         var aggTypeTermsBuilder = AggregationBuilders.terms("types");
         var aggDateHistogramBuilder = AggregationBuilders.dateHistogram("decades");
 
+        //Configuration of subAggregations
         aggTermsGenresBuilder.field("genres")
                 .size(28);
         aggTypeTermsBuilder.field("type")
                 .size(13);
-        
         aggDateHistogramBuilder.field("start_year")
                 //Use of seconds in order to minimize the problem generated by leap-years
                 .fixedInterval(new DateHistogramInterval("315581500s"))
                 .format("yyyy")
                 .offset("2h");
 
-        sourceBuilder.aggregation(aggTermsGenresBuilder).aggregation(aggTypeTermsBuilder)
-                .aggregation(aggDateHistogramBuilder);
+        //Creation and population of filters
+        Map<String, BoolQueryBuilder> queryBuildersFilterMap = getBoolQueryBuilderMap();
+        populateQueryBuildersWithFilters(filters, queryBuildersFilterMap);
+
+        //Declaration and creation of aggregations
+        var filteredAggregationGenres = AggregationBuilders
+                .filter("genres_filter", queryBuildersFilterMap.get("genres"))
+                .subAggregation(aggTermsGenresBuilder);
+        var filteredAggregationTypes = AggregationBuilders
+                .filter("types_filter", queryBuildersFilterMap.get("type"))
+                .subAggregation(aggTypeTermsBuilder);
+        var filteredAggregationDecades = AggregationBuilders
+                .filter("decades_filter", queryBuildersFilterMap.get("decades"))
+                .subAggregation(aggDateHistogramBuilder);
+
+        //Addition of aggregations to the source builder
+        sourceBuilder.aggregation(filteredAggregationDecades).aggregation(filteredAggregationTypes)
+                .aggregation(filteredAggregationGenres);
+    }
+
+    /**
+     * Helper method, creates a dictionary containing a {@link BoolQueryBuilder} per each type of aggregation.
+     *
+     * @return A {@link Map} containing empty BoolQueryBuilders.
+     */
+    private Map<String, BoolQueryBuilder> getBoolQueryBuilderMap() {
+        Map<String, BoolQueryBuilder> queryBuildersFilterDic = new HashMap<>();
+        queryBuildersFilterDic.put("decades", QueryBuilders.boolQuery());
+        queryBuildersFilterDic.put("type", QueryBuilders.boolQuery());
+        queryBuildersFilterDic.put("genres", QueryBuilders.boolQuery());
+        return queryBuildersFilterDic;
+    }
+
+    /**
+     * Helper method, receive a list of filters and a {@link Map} containing {@link BoolQueryBuilder}, each one
+     * relate to one Aggregation. Then populate each BoolQueryBuilder with the corresponding filters, those who have different
+     * field than the boolQueryBuilder. Example: Having three filters. Filter "decades" populate queryBuilders "type" and "genres".
+     *
+     * @param filters                Filters used to populate the BoolQueryBuilder
+     * @param queryBuildersFilterMap Map containing the field name and their corresponding BoolQueryBuilder
+     */
+    private void populateQueryBuildersWithFilters(String[] filters,
+                                                  Map<String, BoolQueryBuilder> queryBuildersFilterMap) {
+        for (var filterStr : filters) {
+            var filter = filterStr.split(":");
+            switch (filter[0]) {
+                case "decades" -> {
+                    var dateRange = filter[1].split("-");
+                    RangeQueryBuilder rangeQueryBuilder = QueryBuilders.
+                            rangeQuery("start_year").format("yyyy")
+                            .gte(dateRange[0]).lte(dateRange[1]);
+                    queryBuildersFilterMap.forEach((k, v) -> {
+                        if (!k.equals("decades"))
+                            v.filter().add(rangeQueryBuilder);
+                    });
+                }
+                case "type", "genres" -> queryBuildersFilterMap.forEach((k, v) -> {
+                    if (!k.equals(filter[0]))
+                        v.filter().add(QueryBuilders.termQuery(filter[0], filter[1]));
+                });
+            }
+        }
     }
 
     /**
@@ -428,9 +492,10 @@ public class ElasticClientUtil implements IElasticUtil {
 
         objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, true);
 
-        Terms genres = response.getAggregations().get("genres");
-        Terms types = response.getAggregations().get("types");
-        Histogram dateHistogram = response.getAggregations().get("decades");
+        Terms genres = ((ParsedFilter) response.getAggregations().get("genres_filter")).getAggregations().get("genres");
+        Terms types = ((ParsedFilter) response.getAggregations().get("types_filter")).getAggregations().get("types");
+        Histogram dateHistogram = ((ParsedFilter) response.getAggregations()
+                .get("decades_filter")).getAggregations().get("decades");
 
         Aggregation<DateHistogramBucket> dateHistogramAggregation =
                 getDateHistogramAggregationPojo(dateHistogram.getBuckets());
