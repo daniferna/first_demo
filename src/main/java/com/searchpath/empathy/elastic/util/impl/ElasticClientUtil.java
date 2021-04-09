@@ -148,6 +148,10 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * Helper method, it builds the main search query, the general one.
+     * Also adds the needed filter functions.
+     * <p>
+     * If the query param is an empty string, it performs a match_all query.
+     * If not, it performs a multi match query.
      *
      * @param query Text containing the information we are looking for.
      * @return The {@link FunctionScoreQueryBuilder} ready to be passed to the request.
@@ -160,6 +164,12 @@ public class ElasticClientUtil implements IElasticUtil {
 
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders
                 .functionScoreQuery(multiMatchQueryBuilder, filterFunctions);
+
+        //If the query is empty, it performs a match all
+        if (query.isEmpty())
+            functionScoreQueryBuilder = QueryBuilders
+                    .functionScoreQuery(new MatchAllQueryBuilder(), filterFunctions);
+
         functionScoreQueryBuilder.boost(5);
         functionScoreQueryBuilder.boostMode(CombineFunction.MULTIPLY);
 
