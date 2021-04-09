@@ -24,9 +24,10 @@ public class IndexController extends BaseController {
     /**
      * Manages the petitions to /index
      * Call which initiates the process of indexing of both the IMDB films and ratings stored in the resources folder.
+     *
      * @return A response with OK status and the returned String of the called method if everything works well.
-     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      * @throws IOException If something went wrong
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      */
     @Get
     public String index() throws IOException {
@@ -43,9 +44,10 @@ public class IndexController extends BaseController {
     /**
      * Manages the petitions to /index/films
      * Call which initiates the process of indexing of the IMDB films stored in the resources folder.
+     *
      * @return A response with OK status and the returned String of the called method if everything works well.
-     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      * @throws IOException If something went wrong
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      */
     @Get("/films")
     public String indexFilms() throws IOException {
@@ -55,9 +57,10 @@ public class IndexController extends BaseController {
     /**
      * Manages the petitions to /index/ratings
      * Call which initiates the process of indexing of the IMDB ratings stored in the resources folder.
+     *
      * @return A response with OK status and the returned String of the called method if everything works well.
-     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      * @throws IOException If something went wrong
+     * @see IElasticUtil#loadIMDBMedia(String, int, Command) ()
      */
     @Get("/ratings")
     public String indexRatings() throws IOException {

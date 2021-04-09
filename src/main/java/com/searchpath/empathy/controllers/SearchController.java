@@ -11,7 +11,6 @@ import io.micronaut.http.annotation.QueryValue;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,7 +29,7 @@ public class SearchController extends BaseController {
      *
      * @param query,title The String the petition shall contain with the query info
      * @return The response of the server, serialized as a JSON {@link QueryResponse}
-     * @throws IOException  If there's a problem when accessing ElasticSearch
+     * @throws IOException If there's a problem when accessing ElasticSearch
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Get
@@ -52,9 +51,10 @@ public class SearchController extends BaseController {
 
     /**
      * Manage the petitions to "/search/titles/:titleID"
+     *
      * @param titleID The ID of the title you're looking for
      * @return The title you were looking for
-     * @throws IOException  If there's a problem when accessing ElasticSearch
+     * @throws IOException If there's a problem when accessing ElasticSearch
      */
     @Get("/titles/{titleID}")
     public Film searchByTitleID(@PathVariable String titleID) throws IOException {

@@ -8,8 +8,7 @@ import com.searchpath.empathy.pojo.aggregations.bucket.IBucket;
 
 import java.io.IOException;
 
-public class AggregationSerializer extends StdSerializer<Aggregation<IBucket>>
-{
+public class AggregationSerializer extends StdSerializer<Aggregation<IBucket>> {
     public AggregationSerializer() {
         this(null);
     }

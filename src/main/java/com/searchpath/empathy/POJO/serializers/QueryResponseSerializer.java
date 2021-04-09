@@ -22,7 +22,7 @@ public class QueryResponseSerializer extends StdSerializer<QueryResponse> {
 
         gen.writeStartObject();
         gen.writeNumberField("total", value.getTotal());
-        gen.writeObjectField("items",value.getItems());
+        gen.writeObjectField("items", value.getItems());
         gen.writeObjectField("aggregations", value.getAggregations());
         gen.writeEndObject();
 

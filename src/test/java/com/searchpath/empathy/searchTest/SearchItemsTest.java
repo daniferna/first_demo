@@ -60,7 +60,7 @@ public class SearchItemsTest {
                 , new String[]{"Action", "Adventure", "Sci-Fi"}, "movie", "2007-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                Map.of("query", "Spiderman 3","genres", "Action,adventure,Sci-Fi"));
+                Map.of("query", "Spiderman 3", "genres", "Action,adventure,Sci-Fi"));
         assertTrue(Arrays.asList(response.getItems()).contains(expectedSpidermanFilm));
     }
 
@@ -107,7 +107,7 @@ public class SearchItemsTest {
                 , "movie", "2017-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                Map.of("query", "Call me by your name","genres", "Drama,romance", "type", "movie"));
+                Map.of("query", "Call me by your name", "genres", "Drama,romance", "type", "movie"));
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 
@@ -117,7 +117,7 @@ public class SearchItemsTest {
                 , "movie", "2017-01-01", null);
 
         var response = elasticUtil.searchByParams(
-                Map.of("query", "Call me by your name","genres", "Drama,romance", "type", "movie", "date", "2016-2018"));
+                Map.of("query", "Call me by your name", "genres", "Drama,romance", "type", "movie", "date", "2016-2018"));
         assertTrue(Arrays.asList(response.getItems()).contains(expectedFilm));
     }
 

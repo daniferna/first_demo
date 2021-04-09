@@ -20,10 +20,9 @@ public interface IElasticUtil {
     String getClusterName() throws IOException;
 
     /**
-     *
-     * @param fileName The name of the file containing the data. It has to be located at the resources folder
+     * @param fileName  The name of the file containing the data. It has to be located at the resources folder
      * @param chunkSize The size you want to divide the read data from the file.
-     * @param command The command containing the logic for the creation of bulks for the specified type of media.
+     * @param command   The command containing the logic for the creation of bulks for the specified type of media.
      * @return "Success loading data" if everything went well.
      * @throws IOException If an error occur during the reading or indexing process.
      */
@@ -41,6 +40,7 @@ public interface IElasticUtil {
 
     /**
      * Search films by their title
+     *
      * @param params The title, genre and type of the film we are looking for
      * @return A QueryResponse containing the films and the number of results
      * @throws IOException In case there is an error accessing elastic search.
@@ -49,8 +49,9 @@ public interface IElasticUtil {
 
     /**
      * Search titles by their id
+     *
      * @param id The id of the title you're looking for
-     * @return  A {@link com.searchpath.empathy.pojo.Film} containing just that title
+     * @return A {@link com.searchpath.empathy.pojo.Film} containing just that title
      * @throws IOException In case there is an error accessing elastic search.
      */
     Film searchByTitleID(String id) throws IOException;

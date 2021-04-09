@@ -33,7 +33,7 @@ public class Film {
                 @JsonProperty("type") String type,
                 @JsonProperty("start_year") String start_year,
                 @JsonProperty("end_year") String end_year) {
-        this(id,title,genres,type,start_year,end_year);
+        this(id, title, genres, type, start_year, end_year);
         this.original_title = originalTitle;
     }
 

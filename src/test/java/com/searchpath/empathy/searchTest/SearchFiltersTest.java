@@ -1,10 +1,8 @@
 package com.searchpath.empathy.searchTest;
 
 import com.searchpath.empathy.elastic.util.IElasticUtil;
-import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
 import com.searchpath.empathy.pojo.aggregations.Aggregation;
-import com.searchpath.empathy.pojo.aggregations.bucket.impl.TermBucket;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +13,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @MicronautTest
 public class SearchFiltersTest {

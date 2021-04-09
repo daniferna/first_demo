@@ -16,7 +16,7 @@ public class Aggregation<T> {
     private final T[] buckets;
 
     @JsonCreator
-    public Aggregation(@JsonProperty  String name, @JsonProperty T[] buckets) {
+    public Aggregation(@JsonProperty String name, @JsonProperty T[] buckets) {
         this.name = name;
         this.buckets = buckets;
     }

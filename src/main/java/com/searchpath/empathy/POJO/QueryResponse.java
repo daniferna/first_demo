@@ -45,10 +45,11 @@ public class QueryResponse {
 
     /**
      * Method that return all aggregations in a unique array.
+     *
      * @return An array containing all the aggregations of this response.
      */
     public Aggregation<?>[] getAggregations() {
-        Aggregation<?>[] allAggregations = new Aggregation[termAggregations.length+1];
+        Aggregation<?>[] allAggregations = new Aggregation[termAggregations.length + 1];
         arraycopy(termAggregations, 0, allAggregations, 0, termAggregations.length);
         allAggregations[termAggregations.length] = dateHistogramAggregation;
         return allAggregations;

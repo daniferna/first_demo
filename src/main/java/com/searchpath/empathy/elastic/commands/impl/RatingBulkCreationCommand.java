@@ -7,7 +7,6 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import javax.inject.Inject;
 import java.io.IOException;
 
 public class RatingBulkCreationCommand implements Command {
