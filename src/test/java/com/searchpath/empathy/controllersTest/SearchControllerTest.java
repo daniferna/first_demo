@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,7 +52,7 @@ public class SearchControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchByParams(new String[]{"Avengers"});
+        var expectedResponse = elasticUtil.searchByParams(Map.of("query", "Avengers"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -61,7 +62,8 @@ public class SearchControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchByParams(new String[]{"Avengers", "", "documentary"});
+        var expectedResponse = elasticUtil.searchByParams(Map.of("query", "Avengers",
+                "type", "documentary"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -71,7 +73,8 @@ public class SearchControllerTest {
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
-        var expectedResponse = elasticUtil.searchByParams(new String[]{"", "drama", "documentary"});
+        var expectedResponse = elasticUtil.searchByParams(Map.of("query", "",
+                "genres", "drama", "type", "documentary"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -83,7 +86,8 @@ public class SearchControllerTest {
 
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchByParams(
-                new String[]{"The Simpsons", "animation,comedy", "tvSeries"});
+                Map.of("query", "The Simpsons", "genres", "animation,comedy",
+                        "type", "tvSeries"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -95,7 +99,8 @@ public class SearchControllerTest {
 
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchByParams(
-                new String[]{"The Simpsons", "animation,comedy", "tvSeries", "2000-2015"});
+                Map.of("query", "The Simpsons", "genres", "animation,comedy",
+                        "type", "tvSeries", "date", "2000-2015"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
@@ -107,7 +112,8 @@ public class SearchControllerTest {
 
         assertNotNull(body);
         var expectedResponse = elasticUtil.searchByParams(
-                new String[]{"The Simpsons", "", "tvSeries", "2000-2015,1990-1998"});
+                Map.of("query", "The Simpsons", "type", "tvSeries",
+                        "date", "2000-2015,1990-1998"));
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 

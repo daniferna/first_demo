@@ -231,17 +231,14 @@ public class ElasticClientUtil implements IElasticUtil {
      *                     the query through the client.
      */
     @Override
-    public QueryResponse searchByParams(String[] params) throws IOException {
+    public QueryResponse searchByParams(Map<String, String> params) throws IOException {
         var request = new SearchRequest("imdb");
-
-        //Make sure the array has the appropriate length
-        params = Arrays.stream(Arrays.copyOf(params, 5))
-                .map(str -> str == null ? "" : str).toArray(String[]::new);
 
         BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
         buildBoolQuery(params, queryBuilder);
 
-        request.source(getSearchSourceBuilder(queryBuilder, params[4].split(",")));
+        request.source(getSearchSourceBuilder(queryBuilder,
+                params.getOrDefault("filters", "").split(",")));
 
         return getQueryResponse(request);
     }
@@ -278,26 +275,20 @@ public class ElasticClientUtil implements IElasticUtil {
      * @param params       A String array containing all the fields that will be used in the bool query as filters
      * @param queryBuilder The builder containing all the information needed to build the Boolean Query.
      */
-    private void buildBoolQuery(String[] params, BoolQueryBuilder queryBuilder) {
-        MatchQueryBuilder matchTypeQueryBuilder;
-
-        var generalSearchQueryBuilder = getSearchQueryBuilder(params[0]);
+    private void buildBoolQuery(Map<String, String> params, BoolQueryBuilder queryBuilder) {
+        var generalSearchQueryBuilder = getSearchQueryBuilder(params.get("query"));
         queryBuilder.must(generalSearchQueryBuilder);
 
-        if (params[1].length() >= 1) {
-            for (var genre : params[1].split(",")) {
+        if (!params.getOrDefault("genres", "").isBlank())
+            for (var genre : params.get("genres").split(","))
                 queryBuilder.filter(new TermQueryBuilder("genres", genre));
-            }
-        }
-        if (params[2].length() >= 1) {
-            matchTypeQueryBuilder = new MatchQueryBuilder("type", params[2]);
-            queryBuilder.filter(matchTypeQueryBuilder);
-        }
-        if (params[3].length() >= 1 && params[3].matches("([0-9]{4}-[0-9]{4},*)+")) {
-            BoolQueryBuilder boolQueryBuilder = buildDateQuery(params[3]);
-            queryBuilder.filter(boolQueryBuilder);
-        }
 
+        if (!params.getOrDefault("type", "").isBlank())
+            queryBuilder.filter(new MatchQueryBuilder("type", params.get("type")));
+
+        if (!params.getOrDefault("date", "").isBlank()
+                && params.get("date").matches("([0-9]{4}-[0-9]{4},*)+"))
+            queryBuilder.filter(buildDateQuery(params.get("date")));
     }
 
     /**

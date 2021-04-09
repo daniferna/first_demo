@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,8 +37,8 @@ public class SearchAggregationsTest {
     public void testSearchWithParamsTermAggregations() throws IOException {
         String expectedAggregations = "[{\"genres\": {\"drama\":405,\"romance\":405,\"comedy\":113,\"crime\":15,\"action\":10,\"thriller\":9,\"war\":8,\"fantasy\":7,\"music\":7,\"musical\":7}},{\"types\": {\"movie\":405}}]";
 
-        var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
-                "drama,romance", "movie"});
+        var response = elasticUtil.searchByParams(Map.of("query", "Call me by your name",
+                "genres", "drama,romance", "type", "movie"));
         assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
     }
 
@@ -53,8 +54,8 @@ public class SearchAggregationsTest {
     public void testSearchWithParamsDecadesAggregations() throws IOException {
         String expectedAggregations = "{\"decades\": {\"1921-1930\":5,\"1930-1939\":17,\"1941-1950\":8,\"1950-1959\":19,\"1961-1970\":31,\"1971-1980\":18,\"1981-1990\":25,\"1991-2000\":42,\"2001-2010\":82,\"2011-2020\":129,\"2021-2030\":5}}";
 
-        var response = elasticUtil.searchByParams(new String[] {"Call me by your name",
-                "drama,romance", "movie"});
+        var response = elasticUtil.searchByParams(Map.of("query", "Call me by your name",
+                "genres", "drama,romance", "type", "movie"));
         assertEquals(objectMapper.writeValueAsString(response.getDateHistogramAggregation()), expectedAggregations);
     }
 

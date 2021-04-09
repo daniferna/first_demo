@@ -6,7 +6,7 @@ import com.searchpath.empathy.pojo.Film;
 import com.searchpath.empathy.pojo.QueryResponse;
 
 import java.io.IOException;
-import java.text.ParseException;
+import java.util.Map;
 
 public interface IElasticUtil {
 
@@ -45,7 +45,7 @@ public interface IElasticUtil {
      * @return A QueryResponse containing the films and the number of results
      * @throws IOException In case there is an error accessing elastic search.
      */
-    QueryResponse searchByParams(String[] params) throws IOException;
+    QueryResponse searchByParams(Map<String, String> params) throws IOException;
 
     /**
      * Search titles by their id

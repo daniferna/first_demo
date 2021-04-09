@@ -11,6 +11,8 @@ import io.micronaut.http.annotation.QueryValue;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller("/search")
@@ -37,8 +39,13 @@ public class SearchController extends BaseController {
                                 @QueryValue("date") Optional<String> date,
                                 @QueryValue("filter*") Optional<String> filter) throws IOException {
 
-        var params = new String[]{query, genres.orElse(""),
-                type.orElse(""), date.orElse(""), filter.orElse("")};
+        var params = Map.of(
+                "query", query,
+                "genres", genres.orElse(""),
+                "type", type.orElse(""),
+                "date", date.orElse(""),
+                "filters", filter.orElse(""));
+
         return elasticUtil.searchByParams(params);
 
     }
