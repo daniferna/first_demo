@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.searchpath.empathy.pojo.aggregations.bucket.IBucket;
 import com.searchpath.empathy.pojo.serializers.BucketSerializer;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonSerialize(using = BucketSerializer.class)
@@ -34,5 +35,18 @@ public class TermBucket implements IBucket {
                 .add("name='" + name + "'")
                 .add("count=" + count)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TermBucket that = (TermBucket) o;
+        return Objects.equals(name, that.name) && Objects.equals(count, that.count);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, count);
     }
 }

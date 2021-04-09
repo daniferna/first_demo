@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.searchpath.empathy.pojo.serializers.AggregationSerializer;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 @JsonSerialize(using = AggregationSerializer.class)
@@ -34,5 +35,20 @@ public class Aggregation<T> {
                 .add("name='" + name + "'")
                 .add("terms=" + Arrays.toString(buckets))
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Aggregation<?> that = (Aggregation<?>) o;
+        return Objects.equals(name, that.name) && Arrays.equals(buckets, that.buckets);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(name);
+        result = 31 * result + Arrays.hashCode(buckets);
+        return result;
     }
 }

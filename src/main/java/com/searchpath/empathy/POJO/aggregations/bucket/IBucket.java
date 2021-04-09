@@ -2,8 +2,8 @@ package com.searchpath.empathy.pojo.aggregations.bucket;
 
 public interface IBucket {
 
-    public String getName();
+    String getName();
 
-    public long getCount();
+    long getCount();
 
 }
