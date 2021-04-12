@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class SearchFiltersTest {
@@ -27,7 +28,7 @@ public class SearchFiltersTest {
     }
 
     @Test
-    public void testSearchFilterByGenre() throws IOException {
+    public void testSearchFilterByType() throws IOException {
         var responseWithFilter = elasticUtil.searchByParams(Map.of("query", "hulk",
                 "filters", "type:movie"));
         var responseWithoutFilter = elasticUtil.search("hulk");
@@ -44,6 +45,58 @@ public class SearchFiltersTest {
         assertNotEquals(decadesAggWithFilter, decadesAggWithoutFilter);
 
         assertNotEquals(responseWithFilter.getItems(), responseWithoutFilter.getItems());
+
+        assertTrue(Arrays.stream(responseWithFilter.getItems()).allMatch(f -> f.getType().equals("movie")));
+    }
+
+    @Test
+    public void testSearchFilterByGenre() throws IOException {
+        var responseWithFilter = elasticUtil.searchByParams(Map.of("query", "hulk",
+                "filters", "genres:sci-fi"));
+        var responseWithoutFilter = elasticUtil.search("hulk");
+
+        var typeAggWithoutFilter = getAggregation(responseWithoutFilter, "types");
+        var typeAggWithFilter = getAggregation(responseWithFilter, "types");
+        var genresAggWithFiler = getAggregation(responseWithFilter, "genres");
+        var genresAggWithoutFilter = getAggregation(responseWithoutFilter, "genres");
+        var decadesAggWithoutFilter = getAggregation(responseWithoutFilter, "decades");
+        var decadesAggWithFilter = getAggregation(responseWithFilter, "decades");
+
+        assertNotEquals(typeAggWithoutFilter, typeAggWithFilter);
+        assertEquals(genresAggWithFiler, genresAggWithoutFilter);
+        assertNotEquals(decadesAggWithFilter, decadesAggWithoutFilter);
+
+        assertNotEquals(responseWithFilter.getItems(), responseWithoutFilter.getItems());
+
+        assertTrue(Arrays.stream(responseWithFilter.getItems()).allMatch(
+                f -> Arrays.asList(f.getGenres()).contains("Sci-Fi")));
+    }
+
+    @Test
+    public void testSearchFilterByDate() throws IOException {
+        var responseWithFilter = elasticUtil.searchByParams(Map.of("query", "hulk",
+                "filters", "date:2000-2008"));
+        var responseWithoutFilter = elasticUtil.search("hulk");
+
+        var typeAggWithoutFilter = getAggregation(responseWithoutFilter, "types");
+        var typeAggWithFilter = getAggregation(responseWithFilter, "types");
+        var genresAggWithFiler = getAggregation(responseWithFilter, "genres");
+        var genresAggWithoutFilter = getAggregation(responseWithoutFilter, "genres");
+        var decadesAggWithoutFilter = getAggregation(responseWithoutFilter, "decades");
+        var decadesAggWithFilter = getAggregation(responseWithFilter, "decades");
+
+        assertNotEquals(typeAggWithoutFilter, typeAggWithFilter);
+        assertNotEquals(genresAggWithFiler, genresAggWithoutFilter);
+        assertEquals(decadesAggWithFilter, decadesAggWithoutFilter);
+
+        assertNotEquals(responseWithFilter.getItems(), responseWithoutFilter.getItems());
+
+        assertTrue(Arrays.stream(responseWithFilter.getItems()).allMatch(f -> {
+            var filmDate = LocalDate.parse(f.getStart_year(), DateTimeFormatter.ISO_DATE);
+            var after = filmDate.isAfter(LocalDate.of(1999, 12, 31));
+            var before = filmDate.isBefore(LocalDate.of(2008, 1, 2));
+            return after && before;
+        }));
 
     }
 

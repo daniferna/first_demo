@@ -459,7 +459,7 @@ public class ElasticClientUtil implements IElasticUtil {
         for (var filterStr : filters) {
             var filter = filterStr.split(":");
             switch (filter[0]) {
-                case "decades" -> {
+                case "date" -> {
                     var dateRange = filter[1].split("-");
                     RangeQueryBuilder rangeQueryBuilder = QueryBuilders.
                             rangeQuery("start_year").format("yyyy")
