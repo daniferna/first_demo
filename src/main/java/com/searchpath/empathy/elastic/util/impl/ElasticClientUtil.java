@@ -541,14 +541,16 @@ public class ElasticClientUtil implements IElasticUtil {
 
     /**
      * Helper method, transform original bucket into a serializable POJO bucket.
+     * Ordered by bucket name.
      *
      * @param originalBuckets Original bucket from Elastic Search
      * @return POJO bucket {@link TermBucket}
      */
     private TermBucket[] transformTermBucketsToPojo(List<? extends Terms.Bucket> originalBuckets) {
         return originalBuckets.stream()
-                .map(bucket -> new TermBucket(bucket.getKeyAsString(), bucket.getDocCount()
-                )).toArray(TermBucket[]::new);
+                .map(bucket -> new TermBucket(bucket.getKeyAsString(), bucket.getDocCount()))
+                .sorted(Comparator.comparing(TermBucket::getName))
+                .toArray(TermBucket[]::new);
     }
 
     /**
