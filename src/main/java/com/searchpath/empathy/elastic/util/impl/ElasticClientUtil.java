@@ -526,6 +526,7 @@ public class ElasticClientUtil implements IElasticUtil {
     private DateHistogramBucket[] transformDateHistogramBucketsToPojo(List<? extends Histogram.Bucket> originalBuckets) {
         return originalBuckets.stream()
                 .map(bucket -> new DateHistogramBucket(bucket.getDocCount(), bucket.getKeyAsString()))
+                .filter(bucket -> bucket.getCount() > 0)
                 .toArray(DateHistogramBucket[]::new);
     }
 
