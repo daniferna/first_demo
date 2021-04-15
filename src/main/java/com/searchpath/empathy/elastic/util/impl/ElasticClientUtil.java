@@ -20,6 +20,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.core.MainResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.index.query.*;
@@ -32,6 +33,9 @@ import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInter
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -48,6 +52,8 @@ import java.util.*;
  */
 @Singleton
 public class ElasticClientUtil implements IElasticUtil {
+
+    public static final String TITLE_TERM_SUGGESTION_NAME = "title_term_suggestion";
 
     @Inject
     ElasticClient client;
@@ -237,8 +243,7 @@ public class ElasticClientUtil implements IElasticUtil {
         BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
         buildBoolQuery(params, queryBuilder);
 
-        request.source(getSearchSourceBuilder(queryBuilder,
-                params.getOrDefault("filters", "").split(",")));
+        request.source(getSearchSourceBuilder(queryBuilder, params));
 
         return getQueryResponse(request);
     }
@@ -320,20 +325,36 @@ public class ElasticClientUtil implements IElasticUtil {
      * configure it.
      *
      * @param queryBuilder     The QueryBuilder we want to transform into a SearchSourceBuilder.
-     * @param filters          The filters you want to apply as post filters.
+     * @param params           The params received by the controller.
      * @param needAggregations A boolean value defining if there is a need for aggregations or not.
      * @return The SearchSourceBuilder properly configured.
      */
-    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, Map<String, String> params
             , boolean needAggregations) {
         var sourceBuilder = new SearchSourceBuilder();
+        var filters = params.getOrDefault("filters", "").split(",");
 
         sourceBuilder.size(10);
         if (needAggregations)
             addAggregations(sourceBuilder, filters);
         addPostFilters(filters, sourceBuilder);
+        sourceBuilder.suggest(getSuggestBuilder(params.get("query")));
 
         return sourceBuilder.query(queryBuilder);
+    }
+
+    /**
+     * Helper method, it creates a {@link SuggestBuilder}, with the query as global text,
+     * containing a {@link TermSuggestionBuilder} for the title field.
+     *
+     * @param query The query as received by the controller.
+     * @return A SuggestBuilder already configured.
+     */
+    private SuggestBuilder getSuggestBuilder(String query) {
+        var suggestBuilder = new SuggestBuilder();
+        suggestBuilder.setGlobalText(query);
+        suggestBuilder.addSuggestion(TITLE_TERM_SUGGESTION_NAME, new TermSuggestionBuilder("title"));
+        return suggestBuilder;
     }
 
     /**
@@ -343,18 +364,18 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
-        return this.getSearchSourceBuilder(queryBuilder, new String[]{}, true);
+        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), true);
     }
 
     /**
      * Implementation of default parameter method using method overloading.
      *
      * @param queryBuilder The QueryBuilder we want to transform into a SearchSourceBuilder.
-     * @param filters      The filters you want to apply as post filters.
+     * @param params       The params received from the controller.
      * @return The SearchSourceBuilder properly configured.
      */
-    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, String[] filters) {
-        return this.getSearchSourceBuilder(queryBuilder, filters, true);
+    private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, Map<String, String> params) {
+        return this.getSearchSourceBuilder(queryBuilder, params, true);
     }
 
     /**
@@ -365,7 +386,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, boolean needAggregations) {
-        return this.getSearchSourceBuilder(queryBuilder, new String[]{}, needAggregations);
+        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), needAggregations);
     }
 
     /**
@@ -505,7 +526,10 @@ public class ElasticClientUtil implements IElasticUtil {
         termAggregations[0] = getTermAggregationPojo(genres.getBuckets(), "genres");
         termAggregations[1] = getTermAggregationPojo(types.getBuckets(), "types");
 
-        return new QueryResponse(total, films, termAggregations, dateHistogramAggregation);
+        TermSuggestion suggestion = response.getSuggest().getSuggestion(TITLE_TERM_SUGGESTION_NAME);
+        var suggestionsNode = objectMapper.readTree(Strings.toString(suggestion));
+
+        return new QueryResponse(total, films, termAggregations, dateHistogramAggregation, suggestionsNode);
     }
 
     /**

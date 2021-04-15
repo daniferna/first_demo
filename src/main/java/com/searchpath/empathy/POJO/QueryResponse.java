@@ -2,6 +2,7 @@ package com.searchpath.empathy.pojo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.searchpath.empathy.pojo.aggregations.Aggregation;
 import com.searchpath.empathy.pojo.aggregations.bucket.impl.DateHistogramBucket;
@@ -20,15 +21,22 @@ public class QueryResponse {
     private final Film[] items;
     private final Aggregation<TermBucket>[] termAggregations;
     private final Aggregation<DateHistogramBucket> dateHistogramAggregation;
+    private final JsonNode suggestion;
 
     @JsonCreator()
     public QueryResponse(@JsonProperty long total, @JsonProperty Film[] items,
                          @JsonProperty Aggregation<TermBucket>[] termAggregations,
-                         @JsonProperty Aggregation<DateHistogramBucket> dateHistogram) {
+                         @JsonProperty Aggregation<DateHistogramBucket> dateHistogram,
+                         @JsonProperty JsonNode suggestion) {
         this.total = total;
         this.items = items;
         this.termAggregations = termAggregations;
         this.dateHistogramAggregation = dateHistogram;
+        this.suggestion = suggestion;
+    }
+
+    public JsonNode getSuggestion() {
+        return suggestion;
     }
 
     public long getTotal() {

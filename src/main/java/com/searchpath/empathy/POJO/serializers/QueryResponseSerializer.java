@@ -24,6 +24,7 @@ public class QueryResponseSerializer extends StdSerializer<QueryResponse> {
         gen.writeNumberField("total", value.getTotal());
         gen.writeObjectField("items", value.getItems());
         gen.writeObjectField("aggregations", value.getAggregations());
+        gen.writeObjectField("suggestions", value.getSuggestion());
         gen.writeEndObject();
 
     }
