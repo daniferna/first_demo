@@ -63,6 +63,17 @@ public class QueryResponse {
         return allAggregations;
     }
 
+    /**
+     * Method that returns the term aggregation passed by params, if it doesn't exist returns an empty aggregation
+     *
+     * @param nameOfAggregation The name of the aggregation
+     * @return The aggregation if found, empty aggregation if not
+     */
+    public Aggregation<TermBucket> findTermAggregation(String nameOfAggregation) {
+        return Arrays.stream(termAggregations).filter(ag -> ag.getName().equals(nameOfAggregation))
+                .findFirst().orElse(new Aggregation<>(nameOfAggregation, new TermBucket[]{}));
+    }
+
     public Aggregation<DateHistogramBucket> getDateHistogramAggregation() {
         return dateHistogramAggregation;
     }

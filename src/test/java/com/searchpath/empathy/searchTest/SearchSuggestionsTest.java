@@ -62,9 +62,9 @@ public class SearchSuggestionsTest {
     private Stream<JsonNode> getSuggestionsStream(QueryResponse response, int indexWordQuery) {
         var suggestions = response.getSuggestion();
 
-        var optionsForIrpn = suggestions.get("title_term_suggestion").get(indexWordQuery).get("options").elements();
+        var options = suggestions.get("title_term_suggestion").get(indexWordQuery).get("options").elements();
         return StreamSupport.stream(Spliterators
-                .spliteratorUnknownSize(optionsForIrpn, Spliterator.ORDERED), false);
+                .spliteratorUnknownSize(options, Spliterator.ORDERED), false);
     }
 
 }

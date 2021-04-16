@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @MicronautTest
 public class SearchAggregationsTest {
@@ -26,37 +28,65 @@ public class SearchAggregationsTest {
     }
 
     @Test
-    public void testSimpleQueryTermAggregations() throws IOException {
-        String expectedAggregations = "[{\"genres\": {\"short\":21142,\"comedy\":19735,\"drama\":16204,\"documentary\":8737,\"adult\":8404,\"talk-show\":7704,\"music\":7702,\"animation\":5303,\"reality-tv\":4692,\"family\":4389}},{\"types\": {\"tvepisode\":46553,\"short\":14005,\"video\":9809,\"movie\":7418,\"tvseries\":2803,\"tvmovie\":1514,\"tvminiseries\":449,\"tvspecial\":415,\"videogame\":204,\"tvshort\":129}}]";
+    public void testSimpleQueryAggregations() throws IOException {
+        var response = elasticUtil.search("Avengers");
 
-        var response = elasticUtil.search("Call me by your name");
-        assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
+        var genresAggregation = response.findTermAggregation("genres");
+        var typesAggregation = response.findTermAggregation("types");
+        var decadesAggregation = response.getDateHistogramAggregation();
+
+        assertEquals(25, genresAggregation.getBuckets().length);
+        assertEquals(9, typesAggregation.getBuckets().length);
+        assertEquals(9, decadesAggregation.getBuckets().length);
+
+        assertTrue(Arrays.stream(genresAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("action") && b.getCount() == 107));
+        assertTrue(Arrays.stream(typesAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("movie") && b.getCount() == 27));
+        assertTrue(Arrays.stream(decadesAggregation.getBuckets())
+                .anyMatch(b -> b.getDecade().equals("2011-2020") && b.getCount() == 844));
     }
 
     @Test
-    public void testSearchWithParamsTermAggregations() throws IOException {
-        String expectedAggregations = "[{\"genres\": {\"drama\":405,\"romance\":405,\"comedy\":113,\"crime\":15,\"action\":10,\"thriller\":9,\"war\":8,\"fantasy\":7,\"music\":7,\"musical\":7}},{\"types\": {\"movie\":405}}]";
+    public void testSearchWithParamsAggregations() throws IOException {
+        var response = elasticUtil.searchByParams(Map.of("query", "Avengers",
+                "genres", "action,adventure", "type", "movie", "date", "1995-2020"));
 
-        var response = elasticUtil.searchByParams(Map.of("query", "Call me by your name",
-                "genres", "drama,romance", "type", "movie"));
-        assertEquals(objectMapper.writeValueAsString(response.getTermAggregations()), expectedAggregations);
+        var genresAggregation = response.findTermAggregation("genres");
+        var typesAggregation = response.findTermAggregation("types");
+        var decadesAggregation = response.getDateHistogramAggregation();
+
+        assertEquals(5, genresAggregation.getBuckets().length);
+        assertEquals(1, typesAggregation.getBuckets().length);
+        assertEquals(2, decadesAggregation.getBuckets().length);
+
+        assertTrue(Arrays.stream(genresAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("sci-fi") && b.getCount() == 4));
+        assertTrue(Arrays.stream(typesAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("movie") && b.getCount() == 6));
+        assertTrue(Arrays.stream(decadesAggregation.getBuckets())
+                .anyMatch(b -> b.getDecade().equals("2011-2020") && b.getCount() == 5));
     }
 
     @Test
-    public void testSimpleQueryDecadesAggregations() throws IOException {
-        String expectedAggregations = "\"decades\": {\"1880-1889\":1,\"1890-1899\":75,\"1900-1909\":348,\"1910-1919\":814,\"1921-1930\":315,\"1930-1939\":346,\"1941-1950\":329,\"1950-1959\":1027,\"1961-1970\":1711,\"1971-1980\":1759,\"1981-1990\":2792,\"1991-2000\":5008,\"2001-2010\":13803,\"2011-2020\":50644,\"2021-2030\":1000}}";
+    public void testSearchWithPostFiltersAggregations() throws IOException {
+        var response = elasticUtil.searchByParams(Map.of("query", "Avengers",
+                "filters", "type:movie,genres:action"));
 
-        var response = elasticUtil.search("Call me by your name");
-        assertEquals(objectMapper.writeValueAsString(response.getDateHistogramAggregation()), expectedAggregations);
-    }
+        var genresAggregation = response.findTermAggregation("genres");
+        var typesAggregation = response.findTermAggregation("types");
+        var decadesAggregation = response.getDateHistogramAggregation();
 
-    @Test
-    public void testSearchWithParamsDecadesAggregations() throws IOException {
-        String expectedAggregations = "{\"decades\": {\"1921-1930\":5,\"1930-1939\":17,\"1941-1950\":8,\"1950-1959\":19,\"1961-1970\":31,\"1971-1980\":18,\"1981-1990\":25,\"1991-2000\":42,\"2001-2010\":82,\"2011-2020\":129,\"2021-2030\":5}}";
+        assertEquals(10, genresAggregation.getBuckets().length);
+        assertEquals(7, typesAggregation.getBuckets().length);
+        assertEquals(6, decadesAggregation.getBuckets().length);
 
-        var response = elasticUtil.searchByParams(Map.of("query", "Call me by your name",
-                "genres", "drama,romance", "type", "movie"));
-        assertEquals(objectMapper.writeValueAsString(response.getDateHistogramAggregation()), expectedAggregations);
+        assertTrue(Arrays.stream(genresAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("sci-fi") && b.getCount() == 6));
+        assertTrue(Arrays.stream(typesAggregation.getBuckets())
+                .anyMatch(b -> b.getName().equals("short") && b.getCount() == 12));
+        assertTrue(Arrays.stream(decadesAggregation.getBuckets())
+                .anyMatch(b -> b.getDecade().equals("2001-2010") && b.getCount() == 1));
     }
 
 }

@@ -145,11 +145,7 @@ public class ElasticClientUtil implements IElasticUtil {
      */
     @Override
     public QueryResponse search(String query) throws IOException {
-        var request = new SearchRequest("imdb");
-
-        request.source(getSearchSourceBuilder(getSearchQueryBuilder(query)));
-
-        return getQueryResponse(request);
+        return searchByParams(Map.of("query", query));
     }
 
     /**
