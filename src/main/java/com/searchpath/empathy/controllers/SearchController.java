@@ -33,7 +33,7 @@ public class SearchController extends BaseController {
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Get
-    public QueryResponse search(@QueryValue("query") String query, @QueryValue("genre") Optional<String> genres,
+    public QueryResponse search(@QueryValue("query") String query, @QueryValue("genres") Optional<String> genres,
                                 @QueryValue("type") Optional<String> type,
                                 @QueryValue("date") Optional<String> date,
                                 @QueryValue("filter*") Optional<String> filter) throws IOException {
