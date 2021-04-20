@@ -34,7 +34,8 @@ import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilder;
-import org.elasticsearch.search.suggest.term.TermSuggestion;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import javax.inject.Inject;
@@ -349,7 +350,7 @@ public class ElasticClientUtil implements IElasticUtil {
     private SuggestBuilder getSuggestBuilder(String query) {
         var suggestBuilder = new SuggestBuilder();
         suggestBuilder.setGlobalText(query);
-        suggestBuilder.addSuggestion(TITLE_TERM_SUGGESTION_NAME, new TermSuggestionBuilder("title"));
+        suggestBuilder.addSuggestion(TITLE_TERM_SUGGESTION_NAME, SuggestBuilders.phraseSuggestion("title"));
         return suggestBuilder;
     }
 
@@ -522,7 +523,7 @@ public class ElasticClientUtil implements IElasticUtil {
         termAggregations[0] = getTermAggregationPojo(genres.getBuckets(), "genres");
         termAggregations[1] = getTermAggregationPojo(types.getBuckets(), "types");
 
-        TermSuggestion suggestion = response.getSuggest().getSuggestion(TITLE_TERM_SUGGESTION_NAME);
+        PhraseSuggestion suggestion = response.getSuggest().getSuggestion(TITLE_TERM_SUGGESTION_NAME);
         var suggestionsNode = objectMapper.readTree(Strings.toString(suggestion));
 
         return new QueryResponse(total, films, termAggregations, dateHistogramAggregation, suggestionsNode);
