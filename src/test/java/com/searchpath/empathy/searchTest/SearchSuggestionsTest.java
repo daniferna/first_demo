@@ -3,6 +3,7 @@ package com.searchpath.empathy.searchTest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.searchpath.empathy.elastic.util.IElasticUtil;
+import com.searchpath.empathy.elastic.util.impl.ElasticClientUtil;
 import com.searchpath.empathy.pojo.QueryResponse;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
@@ -32,14 +33,6 @@ public class SearchSuggestionsTest {
     }
 
     @Test
-    public void searchIrpnMan() throws IOException {
-        var response = elasticUtil.searchByParams(Map.of("query", "Irpn man"));
-        Stream<JsonNode> streamOptionsForIron = getSuggestionsStream(response, 0);
-
-        assertTrue(streamOptionsForIron.anyMatch(p -> p.get("text").asText().equals("iron")));
-    }
-
-    @Test
     public void searchAbengers() throws IOException {
         var response = elasticUtil.searchByParams(Map.of("query", "Abengers"));
         Stream<JsonNode> streamOptionsForIron = getSuggestionsStream(response, 0);
@@ -48,11 +41,11 @@ public class SearchSuggestionsTest {
     }
 
     @Test
-    public void searchTheLandOfStorns() throws IOException {
-        var response = elasticUtil.searchByParams(Map.of("query", "The land of storns"));
-        Stream<JsonNode> streamOptionsForIron = getSuggestionsStream(response, 3);
+    public void searchViharsaroc() throws IOException {
+        var response = elasticUtil.searchByParams(Map.of("query", "Viharsaroc"));
+        Stream<JsonNode> streamOptionsForIron = getSuggestionsStream(response, 0);
 
-        assertTrue(streamOptionsForIron.anyMatch(p -> p.get("text").asText().equals("storms")));
+        assertTrue(streamOptionsForIron.anyMatch(p -> p.get("text").asText().equals("viharsarok")));
     }
 
     /**
@@ -62,7 +55,8 @@ public class SearchSuggestionsTest {
     private Stream<JsonNode> getSuggestionsStream(QueryResponse response, int indexWordQuery) {
         var suggestions = response.getSuggestion();
 
-        var options = suggestions.get("title_term_suggestion").get(indexWordQuery).get("options").elements();
+        var options = suggestions.get(ElasticClientUtil.TITLE_TERM_SUGGESTION_NAME)
+                .get(indexWordQuery).get("options").elements();
         return StreamSupport.stream(Spliterators
                 .spliteratorUnknownSize(options, Spliterator.ORDERED), false);
     }

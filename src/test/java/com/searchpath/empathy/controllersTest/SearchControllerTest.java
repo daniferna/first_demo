@@ -68,7 +68,7 @@ public class SearchControllerTest {
 
     @Test
     public void testSearchByTypeAndGenre() throws IOException {
-        HttpRequest<String> request = HttpRequest.GET("/search?query=&type=documentary&genre=Drama");
+        HttpRequest<String> request = HttpRequest.GET("/search?query=&type=documentary&genres=Drama");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -80,7 +80,7 @@ public class SearchControllerTest {
     @Test
     public void testSearchByTitleGenreAndType() throws IOException {
         HttpRequest<String> request = HttpRequest.GET(
-                "/search?query=The+Simpsons&type=tvSeries&genre=animation,comedy");
+                "/search?query=The+Simpsons&type=tvSeries&genres=animation,comedy");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);
@@ -93,7 +93,7 @@ public class SearchControllerTest {
     @Test
     public void testSearchByTitleGenreTypeAndDate() throws IOException {
         HttpRequest<String> request = HttpRequest.GET(
-                "/search?query=The+Simpsons&type=tvSeries&genre=animation,comedy&date=2000-2015");
+                "/search?query=The+Simpsons&type=tvSeries&genres=animation,comedy&date=2000-2015");
         var body = client.toBlocking().retrieve(request);
 
         assertNotNull(body);

@@ -251,7 +251,8 @@ The API search endpoints always return a response in JSON format containing the 
     1. Genres
     2. Types
     3. Decades
-4. "suggestions": Contains suggestions for the received query in case elasticsearch detects a misspelling .
+4. "suggestions": Contains suggestions for the received query in case elasticsearch detects a misspelling and there are
+   less than 30 results for the query.
 
 #### Examples of responses
 
@@ -490,49 +491,38 @@ The API search endpoints always return a response in JSON format containing the 
 
 
 <details>
-<summary>Suggestions part of the response for "Irpn Man" query</summary>
+<summary>Suggestions part of the response for "abengers" query</summary>
 
 ````json
-{
+  {
   "suggestions": {
     "title_term_suggestion": [
       {
-        "text": "irpn",
+        "text": "abengers",
         "offset": 0,
-        "length": 4,
+        "length": 8,
         "options": [
           {
-            "text": "iron",
-            "score": 0.75,
-            "freq": 2747
+            "text": "avengers",
+            "score": 0.009980146
           },
           {
-            "text": "iran",
-            "score": 0.75,
-            "freq": 737
+            "text": "abangers",
+            "score": 0.00075240026
           },
           {
-            "text": "iren",
-            "score": 0.75,
-            "freq": 6
+            "text": "advengers",
+            "score": 0.0007036785
           },
           {
-            "text": "irin",
-            "score": 0.75,
-            "freq": 3
+            "text": "avengera",
+            "score": 0.0007036785
           },
           {
-            "text": "irpen",
-            "score": 0.75,
-            "freq": 3
+            "text": "avengerus",
+            "score": 0.0007036785
           }
         ]
-      },
-      {
-        "text": "man",
-        "offset": 5,
-        "length": 3,
-        "options": []
       }
     ]
   }

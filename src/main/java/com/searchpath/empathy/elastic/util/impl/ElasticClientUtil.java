@@ -1,8 +1,10 @@
 package com.searchpath.empathy.elastic.util.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.UnmodifiableIterator;
@@ -240,9 +242,15 @@ public class ElasticClientUtil implements IElasticUtil {
         BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
         buildBoolQuery(params, queryBuilder);
 
-        request.source(getSearchSourceBuilder(queryBuilder, params));
+        var searchResponse = getQueryResponse(request.source(
+                getSearchSourceBuilder(queryBuilder, params)));
 
-        return getQueryResponse(request);
+        //If no results, ask for suggestions
+        if (searchResponse.getTotal() < 30)
+            searchResponse = getQueryResponse(request.source(
+                    getSearchSourceBuilder(queryBuilder, params, true, true)));
+
+        return searchResponse;
     }
 
     /**
@@ -327,7 +335,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, Map<String, String> params
-            , boolean needAggregations) {
+            , boolean needAggregations, boolean needSuggestions) {
         var sourceBuilder = new SearchSourceBuilder();
         var filters = params.getOrDefault("filters", "").split(",");
 
@@ -335,7 +343,8 @@ public class ElasticClientUtil implements IElasticUtil {
         if (needAggregations)
             addAggregations(sourceBuilder, filters);
         addPostFilters(filters, sourceBuilder);
-        sourceBuilder.suggest(getSuggestBuilder(params.get("query")));
+        if (needSuggestions)
+            sourceBuilder.suggest(getSuggestBuilder(params.get("query")));
 
         return sourceBuilder.query(queryBuilder);
     }
@@ -361,7 +370,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder) {
-        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), true);
+        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), true, false);
     }
 
     /**
@@ -372,7 +381,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, Map<String, String> params) {
-        return this.getSearchSourceBuilder(queryBuilder, params, true);
+        return this.getSearchSourceBuilder(queryBuilder, params, true, false);
     }
 
     /**
@@ -383,7 +392,7 @@ public class ElasticClientUtil implements IElasticUtil {
      * @return The SearchSourceBuilder properly configured.
      */
     private SearchSourceBuilder getSearchSourceBuilder(QueryBuilder queryBuilder, boolean needAggregations) {
-        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), needAggregations);
+        return this.getSearchSourceBuilder(queryBuilder, Collections.emptyMap(), needAggregations, false);
     }
 
     /**
@@ -523,8 +532,12 @@ public class ElasticClientUtil implements IElasticUtil {
         termAggregations[0] = getTermAggregationPojo(genres.getBuckets(), "genres");
         termAggregations[1] = getTermAggregationPojo(types.getBuckets(), "types");
 
-        PhraseSuggestion suggestion = response.getSuggest().getSuggestion(TITLE_TERM_SUGGESTION_NAME);
-        var suggestionsNode = objectMapper.readTree(Strings.toString(suggestion));
+        JsonNode suggestionsNode = new JsonNodeFactory(false).missingNode();
+
+        if (response.getSuggest() != null) {
+            PhraseSuggestion suggestion = response.getSuggest().getSuggestion(TITLE_TERM_SUGGESTION_NAME);
+            suggestionsNode = objectMapper.readTree(Strings.toString(suggestion));
+        }
 
         return new QueryResponse(total, films, termAggregations, dateHistogramAggregation, suggestionsNode);
     }
