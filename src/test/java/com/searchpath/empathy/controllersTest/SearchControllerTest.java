@@ -15,8 +15,7 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class SearchControllerTest {
@@ -113,6 +112,23 @@ public class SearchControllerTest {
         var expectedResponse = elasticUtil.searchByParams(
                 Map.of("query", "The Simpsons", "type", "tvSeries",
                         "date", "2000-2015,1990-1998"));
+        assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
+    }
+
+    @Test
+    public void testSearchWithFilter() throws IOException {
+        HttpRequest<String> request = HttpRequest.GET(
+                "/search?query=The+Simpsons&filter=type:tvSeries");
+        var body = client.toBlocking().retrieve(request);
+
+        assertNotNull(body);
+        var notExpectedResponse = elasticUtil.searchByParams(
+                Map.of("query", "The Simpsons", "type", "tvSeries",
+                        "date", "2000-2015,1990-1998"));
+        var expectedResponse = elasticUtil.searchByParams(
+                Map.of("query", "The Simpsons", "filters", "type:tvSeries"));
+
+        assertNotEquals(objectMapper.writeValueAsString(notExpectedResponse), body);
         assertEquals(objectMapper.writeValueAsString(expectedResponse), body);
     }
 
