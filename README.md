@@ -468,22 +468,7 @@ The API search endpoints always return a response in JSON format containing the 
       }
     }
   ],
-  "suggestions": {
-    "title_term_suggestion": [
-      {
-        "text": "iron",
-        "offset": 0,
-        "length": 4,
-        "options": []
-      },
-      {
-        "text": "man",
-        "offset": 5,
-        "length": 3,
-        "options": []
-      }
-    ]
-  }
+  "suggestions": null
 }
 ````
 
