@@ -104,9 +104,7 @@ public class ElasticClientUtil implements IElasticUtil {
         while (linesList.hasNext()) {
             List<String> list = linesList.next();
 
-            for (String line : list) {
-                command.execute(line, bulk, objectMapper);
-            }
+            for (String line : list) command.execute(line, bulk, objectMapper);
 
             client.getClient().bulk(bulk, RequestOptions.DEFAULT);
             bulk = new BulkRequest();
@@ -359,7 +357,8 @@ public class ElasticClientUtil implements IElasticUtil {
     private SuggestBuilder getSuggestBuilder(String query) {
         var suggestBuilder = new SuggestBuilder();
         suggestBuilder.setGlobalText(query);
-        suggestBuilder.addSuggestion(TITLE_TERM_SUGGESTION_NAME, SuggestBuilders.phraseSuggestion("title"));
+        suggestBuilder.addSuggestion(TITLE_TERM_SUGGESTION_NAME,
+                SuggestBuilders.phraseSuggestion("title.keyword"));
         return suggestBuilder;
     }
 
