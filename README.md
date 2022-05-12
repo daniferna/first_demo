@@ -1,4 +1,4 @@
-# Search path project
+# IMDB search engine - Internship project
 
 This is a demo of a Micronaut API Client which manage petitions to an elasticsearch client done as part of my internship
 at Empathy.co
