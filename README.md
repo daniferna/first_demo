@@ -9,9 +9,9 @@ It uses data from IMDB.
 
 Make sure you have installed in your system the following items:
 
-* Java 15
+* Java 16
 * Docker Desktop CE
-* Gradle 6.4.1
+* Gradle 7.2
 
 I recommend using SDKMan for the installation, but is not mandatory.
 
@@ -20,7 +20,7 @@ curl -s "https://get.sdkman.io" | bash
 sdk list java
 #Choose the Java v11 you like the most, I use java 11.0.3.hs-adpt
 sdk install java <the one you choosed>
-sdk install gradle 6.4.1
+sdk install gradle 7.2
 ```
 
 ## First steps
@@ -32,13 +32,13 @@ To start using the search engine we need to deploy our elasticsearch engine. Thi
 1. Open a terminal and download the elasticsearch docker image:<br/>
 
 ```bash   
-docker pull docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+docker pull docker.elastic.co/elasticsearch/elasticsearch:7.17.6
 ```
 
 2. Deploy this image using the ports 9200 and 9300:<br/>
 
 ```bash   
-docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.17.6
 ```
 
 In successive deployments you just need to deploy through the Docker Desktop app or through the following command:
@@ -511,6 +511,7 @@ The API search endpoints always return a response in JSON format containing the 
       }
     ]
   }
+}
 ````
 
 </details>

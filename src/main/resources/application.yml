@@ -3,4 +3,4 @@ micronaut:
     cors:
       enabled: true
   application:
-    name: first_demo
+    name: imdb_search_api

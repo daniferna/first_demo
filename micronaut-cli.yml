@@ -1,5 +1,5 @@
 applicationType: default
-defaultPackage: com.searchpath.empathy
+defaultPackage: com.dfa.imdb_search_api
 testFramework: junit
 sourceLanguage: java
 buildTool: gradle
